@@ -26,6 +26,9 @@ mkdir -p $DIR/git
 pushd $DIR/git
 	git init
 
+	git config user.email "concourse@example.com"
+  	git config user.name "Concourse Tracker Resource"
+
 	touch file.txt
 	git add file.txt
 	git commit -m "add file [finishes #123456]"
