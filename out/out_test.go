@@ -25,6 +25,8 @@ var _ = Describe("In", func() {
 
 		tmpdir, err = ioutil.TempDir("", "out-tmp")
 		Ω(err).ShouldNot(HaveOccurred())
+		err = os.MkdirAll(tmpdir, 0755)
+		Ω(err).ShouldNot(HaveOccurred())
 
 		setupTestEnvironment(tmpdir)
 
@@ -67,9 +69,9 @@ var _ = Describe("In", func() {
 })
 
 func setupTestEnvironment(path string) {
-	cmd := exec.Command("bash", "-c", filepath.Join("scripts/setup.sh"))
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd := exec.Command(filepath.Join("scripts/setup.sh"), path)
+	cmd.Stdout = GinkgoWriter
+	cmd.Stderr = GinkgoWriter
 
 	err := cmd.Run()
 	Ω(err).ShouldNot(HaveOccurred())
