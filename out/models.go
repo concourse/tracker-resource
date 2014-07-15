@@ -9,8 +9,9 @@ type OutRequest struct {
 }
 
 type Params struct {
-	Token     string `json:"token"`
-	ProjectID int    `json:"project_id"`
+	Token      string `json:"token"`
+	ProjectID  int    `json:"project_id"`
+	TrackerURL string `json:"tracker_url"`
 }
 
 type OutResponse struct {

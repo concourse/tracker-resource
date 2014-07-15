@@ -3,14 +3,18 @@ package out_test
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gbytes"
+	. "github.com/onsi/gomega/gexec"
 
-	"github.com/onsi/gomega/gexec"
+	"github.com/onsi/gomega/ghttp"
 
 	"github.com/concourse/tracker-resource/out"
 )
@@ -41,29 +45,50 @@ var _ = Describe("In", func() {
 		var request out.OutRequest
 		var response out.OutResponse
 
-		BeforeEach(func() {
-			request = out.OutRequest{}
+		var server *ghttp.Server
 
+		BeforeEach(func() {
+			server = ghttp.NewServer()
+
+			request = out.OutRequest{
+				Params: out.Params{
+					Token:      "abc",
+					TrackerURL: server.URL(),
+					ProjectID:  1234,
+				},
+			}
 			response = out.OutResponse{}
 		})
 
-		JustBeforeEach(func() {
+		AfterEach(func() {
+			server.Close()
+		})
+
+		It("finds finished stories that are mentioned in recent git commits", func() {
+			server.AppendHandlers(ghttp.CombineHandlers(
+				ghttp.VerifyRequest("GET", "/services/v5/projects/1234/stories"),
+				ghttp.VerifyHeaderKV("X-TrackerToken", "abc"),
+
+				ghttp.RespondWith(http.StatusOK, Fixture("stories.json")),
+			))
+
 			stdin, err := outCmd.StdinPipe()
 			Ω(err).ShouldNot(HaveOccurred())
 
-			session, err := gexec.Start(outCmd, GinkgoWriter, GinkgoWriter)
+			session, err := Start(outCmd, GinkgoWriter, GinkgoWriter)
 			Ω(err).ShouldNot(HaveOccurred())
 
 			err = json.NewEncoder(stdin).Encode(request)
 			Ω(err).ShouldNot(HaveOccurred())
 
-			Eventually(session).Should(gexec.Exit(0))
+			Eventually(session).Should(Exit(0))
+
+			Ω(session.Err).Should(Say("abc"))
 
 			err = json.Unmarshal(session.Out.Contents(), &response)
 			Ω(err).ShouldNot(HaveOccurred())
-		})
 
-		It("finds finished stories that are mentioned in recent git commits", func() {
+			Ω(response.Version.Time).Should(BeTemporally("~", time.Now(), time.Second))
 		})
 	})
 })

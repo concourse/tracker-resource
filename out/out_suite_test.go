@@ -1,6 +1,8 @@
 package out_test
 
 import (
+	"io/ioutil"
+	"path/filepath"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -24,4 +26,14 @@ var _ = AfterSuite(func() {
 func TestOut(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Out Suite")
+}
+
+func Fixture(filename string) string {
+	path := filepath.Join("fixtures", filename)
+	contents, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(contents)
 }
