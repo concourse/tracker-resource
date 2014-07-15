@@ -1,0 +1,87 @@
+[
+   {
+       "kind": "story",
+       "id": 560,
+       "created_at": 1401796800000,
+       "updated_at": 1401796800000,
+       "story_type": "bug",
+       "name": "Tractor beam loses power intermittently",
+       "current_state": "finished",
+       "requested_by_id": 102,
+       "project_id": 99,
+       "url": "http://localhost/story/show/560",
+       "owner_ids":
+       [
+       ],
+       "labels":
+       [
+       ]
+   },
+   {
+       "kind": "story",
+       "id": 565,
+       "created_at": 1401796800000,
+       "updated_at": 1401796800000,
+       "story_type": "chore",
+       "name": "Repair CommLink",
+       "description": "It's malfunctioning.",
+       "current_state": "finished",
+       "requested_by_id": 104,
+       "project_id": 99,
+       "url": "http://localhost/story/show/565",
+       "owner_ids":
+       [
+       ],
+       "labels":
+       [
+           {
+               "id": 2010,
+               "project_id": 99,
+               "kind": "label",
+               "name": "mnt",
+               "created_at": 1401796800000,
+               "updated_at": 1401796800000
+           }
+       ]
+   },
+   {
+       "kind": "story",
+       "id": 552,
+       "created_at": 1401796800000,
+       "updated_at": 1401796800000,
+       "deadline": 1401796805000,
+       "story_type": "release",
+       "name": "Battlestation fully operational",
+       "description": "Everything is proceeding as I have foreseen.",
+       "current_state": "finished",
+       "requested_by_id": 100,
+       "project_id": 99,
+       "url": "http://localhost/story/show/552",
+       "owner_ids":
+       [
+       ],
+       "labels":
+       [
+       ]
+   },
+   {
+       "kind": "story",
+       "id": 555,
+       "created_at": 1401796800000,
+       "updated_at": 1401796800000,
+       "estimate": 2,
+       "story_type": "feature",
+       "name": "Bring me the passengers",
+       "description": "ignore the droids",
+       "current_state": "finished",
+       "requested_by_id": 101,
+       "project_id": 99,
+       "url": "http://localhost/story/show/555",
+       "owner_ids":
+       [
+       ],
+       "labels":
+       [
+       ]
+   }
+]

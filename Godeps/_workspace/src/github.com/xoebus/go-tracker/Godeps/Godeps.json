@@ -1,0 +1,14 @@
+{
+	"ImportPath": "github.com/xoebus/go-tracker",
+	"GoVersion": "go1.2.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/onsi/ginkgo",
+			"Rev": "b0135c67a250bf7b1dee86389d2ba4bf6a579407"
+		},
+		{
+			"ImportPath": "github.com/onsi/gomega",
+			"Rev": "451e6b907ccb6a21337f3a9f5d165cae46849c89"
+		}
+	]
+}
