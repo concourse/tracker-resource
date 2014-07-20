@@ -55,6 +55,7 @@ var _ = Describe("In", func() {
 					Token:      "abc",
 					TrackerURL: server.URL(),
 					ProjectID:  1234,
+					ProjectDir: "git",
 				},
 			}
 			response = out.OutResponse{}
@@ -65,29 +66,40 @@ var _ = Describe("In", func() {
 		})
 
 		It("finds finished stories that are mentioned in recent git commits", func() {
-			server.AppendHandlers(ghttp.CombineHandlers(
-				ghttp.VerifyRequest("GET", "/services/v5/projects/1234/stories"),
-				ghttp.VerifyHeaderKV("X-TrackerToken", "abc"),
-
-				ghttp.RespondWith(http.StatusOK, Fixture("stories.json")),
-			))
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/services/v5/projects/1234/stories"),
+					ghttp.VerifyHeaderKV("X-TrackerToken", "abc"),
+					ghttp.RespondWith(http.StatusOK, Fixture("stories.json")),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PUT", "/services/v5/projects/1234/stories/123456"),
+					ghttp.VerifyHeaderKV("X-TrackerToken", "abc"),
+					ghttp.VerifyJSON(`{"current_state":"delivered"}`),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PUT", "/services/v5/projects/1234/stories/123457"),
+					ghttp.VerifyHeaderKV("X-TrackerToken", "abc"),
+					ghttp.VerifyJSON(`{"current_state":"delivered"}`),
+				),
+			)
 
 			stdin, err := outCmd.StdinPipe()
 			Ω(err).ShouldNot(HaveOccurred())
 
 			session, err := Start(outCmd, GinkgoWriter, GinkgoWriter)
 			Ω(err).ShouldNot(HaveOccurred())
-
 			err = json.NewEncoder(stdin).Encode(request)
 			Ω(err).ShouldNot(HaveOccurred())
-
 			Eventually(session).Should(Exit(0))
 
-			Ω(session.Err).Should(Say("abc"))
+			Ω(session.Err).Should(Say("could not find story for delivery: 565"))
+			Ω(session.Err).Should(Say("delivering it!: 123456"))
+			Ω(session.Err).Should(Say("delivering it!: 123457"))
 
+			// Output
 			err = json.Unmarshal(session.Out.Contents(), &response)
 			Ω(err).ShouldNot(HaveOccurred())
-
 			Ω(response.Version.Time).Should(BeTemporally("~", time.Now(), time.Second))
 		})
 	})

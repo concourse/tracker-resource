@@ -1,24 +1,6 @@
 [
    {
        "kind": "story",
-       "id": 560,
-       "created_at": 1401796800000,
-       "updated_at": 1401796800000,
-       "story_type": "bug",
-       "name": "Tractor beam loses power intermittently",
-       "current_state": "finished",
-       "requested_by_id": 102,
-       "project_id": 99,
-       "url": "http://localhost/story/show/560",
-       "owner_ids":
-       [
-       ],
-       "labels":
-       [
-       ]
-   },
-   {
-       "kind": "story",
        "id": 565,
        "created_at": 1401796800000,
        "updated_at": 1401796800000,
@@ -46,7 +28,7 @@
    },
    {
        "kind": "story",
-       "id": 552,
+       "id": 123456,
        "created_at": 1401796800000,
        "updated_at": 1401796800000,
        "deadline": 1401796805000,
@@ -66,7 +48,7 @@
    },
    {
        "kind": "story",
-       "id": 555,
+       "id": 123457,
        "created_at": 1401796800000,
        "updated_at": 1401796800000,
        "estimate": 2,

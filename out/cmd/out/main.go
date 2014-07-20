@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/concourse/tracker-resource/out"
 
 	"github.com/xoebus/go-tracker"
+	"github.com/xoebus/go-tracker/resources"
 )
 
 func main() {
@@ -17,7 +20,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// sources := os.Args[1]
+	sources := os.Args[1]
 
 	var request out.OutRequest
 
@@ -35,17 +38,47 @@ func main() {
 	projectID := request.Params.ProjectID
 	fmt.Fprintf(os.Stderr, "Tracker Project ID: %d\n", projectID)
 
-	tracker.DefaultURL = trackerURL
-	client := tracker.NewClient(token)
+	projectDirectory := request.Params.ProjectDir
+	fmt.Fprintf(os.Stderr, "Project Sub Directory: %s\n", projectDirectory)
 
-	stories, err := client.InProject(projectID).Stories()
+	tracker.DefaultURL = trackerURL
+	client := tracker.NewClient(token).InProject(projectID)
+
+	stories, err := client.Stories()
 	if err != nil {
 		fatal("getting list of stories", err)
 	}
 
-	fmt.Fprintf(os.Stderr, "%+v", stories)
+	for _, story := range stories {
+		deliverIfDone(client, story, sources, projectDirectory)
+	}
 
 	outputResponse()
+}
+
+func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources string, projectDirectory string) {
+	dir := filepath.Join(sources, projectDirectory)
+	outputFixes := checkOutput("fixes", story, dir)
+	outputFinishes := checkOutput("finishes", story, dir)
+
+	if len(outputFixes) > 0 || len(outputFinishes) > 0 {
+		fmt.Fprintf(os.Stderr, "found the story, delivering it!: %d\n", story.ID)
+		client.DeliverStory(story.ID)
+	} else {
+		fmt.Fprintf(os.Stderr, "could not find story for delivery: %d\n", story.ID)
+	}
+}
+
+func checkOutput(verb string, story resources.Story, dir string) []byte {
+	command := exec.Command("git", "log", "--grep", fmt.Sprintf("%s #%d", verb, story.ID))
+	command.Dir = dir
+
+	output, err := command.CombinedOutput()
+	if err != nil {
+		fatal(fmt.Sprintf("searching git for story %d", story.ID), err)
+	}
+
+	return output
 }
 
 func outputResponse() {
