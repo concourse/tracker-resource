@@ -3,7 +3,7 @@ FROM ubuntu:14.04
 RUN apt-get update && apt-get -y install wget git
 
 ENV PATH /usr/local/go/bin:$PATH
-ENV GOPATH /tmp/go
+ENV GOPATH /tmp/go/src/github.com/concourse/tracker-resource/Godeps/_workspace:/tmp/go
 
 ADD . /tmp/go/src/github.com/concourse/tracker-resource
 
