@@ -1,6 +1,6 @@
 FROM ubuntu:14.04
 
-RUN apt-get update && apt-get -y install wget
+RUN apt-get update && apt-get -y install wget git
 
 ENV PATH /usr/local/go/bin:$PATH
 ENV GOPATH /tmp/go
