@@ -51,7 +51,7 @@ var _ = Describe("In", func() {
 			server = ghttp.NewServer()
 
 			request = out.OutRequest{
-				Params: out.Params{
+				Source: out.Source{
 					Token:      "abc",
 					TrackerURL: server.URL(),
 					ProjectID:  1234,

@@ -5,10 +5,10 @@ import (
 )
 
 type OutRequest struct {
-	Params Params `json:"params"`
+	Source Source `json:"source"`
 }
 
-type Params struct {
+type Source struct {
 	Token      string `json:"token"`
 	ProjectID  int    `json:"project_id"`
 	TrackerURL string `json:"tracker_url"`

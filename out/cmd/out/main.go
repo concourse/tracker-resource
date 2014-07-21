@@ -29,13 +29,13 @@ func main() {
 		fatal("reading request", err)
 	}
 
-	trackerURL := request.Params.TrackerURL
+	trackerURL := request.Source.TrackerURL
 	fmt.Fprintf(os.Stderr, "Tracker URL: %s\n", trackerURL)
 
-	token := request.Params.Token
+	token := request.Source.Token
 	fmt.Fprintf(os.Stderr, "Tracker Token: %s\n", token)
 
-	projectID := request.Params.ProjectID
+	projectID := request.Source.ProjectID
 	fmt.Fprintf(os.Stderr, "Tracker Project ID: %d\n", projectID)
 
 	tracker.DefaultURL = trackerURL
