@@ -32,8 +32,19 @@ pushd $DIR/git
 	touch file.txt
 	git add file.txt
 	git commit -m "add file [finishes #123456]"
+popd
+
+# git2: git harder directory
+mkdir -p $DIR/git2
+pushd $DIR/git2
+	git init
+
+	git config user.email "concourse@example.com"
+  	git config user.name "Concourse Tracker Resource"
 
 	echo "bugfix" > file.txt
 	git add file.txt
-	git commit -m "fix bug [fixes #123457]"
+	git commit -m "fix bug
+
+	[fixes #123457]"
 popd

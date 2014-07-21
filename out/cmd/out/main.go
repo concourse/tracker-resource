@@ -38,9 +38,6 @@ func main() {
 	projectID := request.Params.ProjectID
 	fmt.Fprintf(os.Stderr, "Tracker Project ID: %d\n", projectID)
 
-	projectDirectory := request.Params.ProjectDir
-	fmt.Fprintf(os.Stderr, "Project Sub Directory: %s\n", projectDirectory)
-
 	tracker.DefaultURL = trackerURL
 	client := tracker.NewClient(token).InProject(projectID)
 
@@ -50,22 +47,31 @@ func main() {
 	}
 
 	for _, story := range stories {
-		deliverIfDone(client, story, sources, projectDirectory)
+		deliverIfDone(client, story, sources)
 	}
 
 	outputResponse()
 }
 
-func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources string, projectDirectory string) {
-	dir := filepath.Join(sources, projectDirectory)
-	outputFixes := checkOutput("fixes", story, dir)
-	outputFinishes := checkOutput("finishes", story, dir)
+func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources string) {
+	glob := filepath.Join(sources, "*", ".git", "..")
+	matches, err := filepath.Glob(glob)
+	if err != nil {
+		fatal("globbing", err)
+	}
 
-	if len(outputFixes) > 0 || len(outputFinishes) > 0 {
-		fmt.Fprintf(os.Stderr, "found the story, delivering it!: %d\n", story.ID)
-		client.DeliverStory(story.ID)
-	} else {
-		fmt.Fprintf(os.Stderr, "could not find story for delivery: %d\n", story.ID)
+	for _, dir := range matches {
+		fmt.Fprintf(os.Stderr, "checking in dir %s\n", dir)
+
+		outputFixes := checkOutput("fixes", story, dir)
+		outputFinishes := checkOutput("finishes", story, dir)
+
+		if len(outputFixes) > 0 || len(outputFinishes) > 0 {
+			fmt.Fprintf(os.Stderr, "found the story, delivering it!: %d\n", story.ID)
+			client.DeliverStory(story.ID)
+		} else {
+			fmt.Fprintf(os.Stderr, "could not find story for delivery: %d\n", story.ID)
+		}
 	}
 }
 
@@ -75,7 +81,9 @@ func checkOutput(verb string, story resources.Story, dir string) []byte {
 
 	output, err := command.CombinedOutput()
 	if err != nil {
-		fatal(fmt.Sprintf("searching git for story %d", story.ID), err)
+		fmt.Fprintf(os.Stderr, "git logging failed for story: %d: %s\n", story.ID, err)
+
+		return nil
 	}
 
 	return output

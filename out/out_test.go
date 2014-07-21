@@ -55,7 +55,6 @@ var _ = Describe("In", func() {
 					Token:      "abc",
 					TrackerURL: server.URL(),
 					ProjectID:  1234,
-					ProjectDir: "git",
 				},
 			}
 			response = out.OutResponse{}
