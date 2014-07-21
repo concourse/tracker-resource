@@ -56,6 +56,12 @@ var _ = Describe("In", func() {
 					TrackerURL: server.URL(),
 					ProjectID:  1234,
 				},
+				Params: out.Params{
+					Repos: []string{
+						"git",
+						"middle/git2",
+					},
+				},
 			}
 			response = out.OutResponse{}
 		})

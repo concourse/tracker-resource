@@ -38,6 +38,9 @@ func main() {
 	projectID := request.Source.ProjectID
 	fmt.Fprintf(os.Stderr, "Tracker Project ID: %d\n", projectID)
 
+	repos := request.Params.Repos
+	fmt.Fprintf(os.Stderr, "Repositories: %+v\n", repos)
+
 	tracker.DefaultURL = trackerURL
 	client := tracker.NewClient(token).InProject(projectID)
 
@@ -47,20 +50,16 @@ func main() {
 	}
 
 	for _, story := range stories {
-		deliverIfDone(client, story, sources)
+		deliverIfDone(client, story, sources, repos)
 	}
 
 	outputResponse()
 }
 
-func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources string) {
-	glob := filepath.Join(sources, "*", ".git", "..")
-	matches, err := filepath.Glob(glob)
-	if err != nil {
-		fatal("globbing", err)
-	}
+func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources string, repos []string) {
+	for _, repo := range repos {
+		dir := filepath.Join(sources, repo)
 
-	for _, dir := range matches {
 		fmt.Fprintf(os.Stderr, "checking in dir %s\n", dir)
 
 		outputFixes := checkOutput("fixes", story, dir)

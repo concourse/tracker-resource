@@ -35,8 +35,8 @@ pushd $DIR/git
 popd
 
 # git2: git harder directory
-mkdir -p $DIR/git2
-pushd $DIR/git2
+mkdir -p $DIR/middle/git2
+pushd $DIR/middle/git2
 	git init
 
 	git config user.email "concourse@example.com"

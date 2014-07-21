@@ -6,6 +6,11 @@ import (
 
 type OutRequest struct {
 	Source Source `json:"source"`
+	Params Params `json:"params"`
+}
+
+type Params struct {
+	Repos []string `json:"repos"`
 }
 
 type Source struct {
