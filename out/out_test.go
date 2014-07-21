@@ -98,6 +98,9 @@ var _ = Describe("In", func() {
 			Ω(err).ShouldNot(HaveOccurred())
 			Eventually(session).Should(Exit(0))
 
+			// does not output credentials
+			Ω(session.Err).ShouldNot(Say("abc"))
+
 			Ω(session.Err).Should(Say("could not find story for delivery: 565"))
 			Ω(session.Err).Should(Say("delivering it!: 123456"))
 			Ω(session.Err).Should(Say("delivering it!: 123457"))

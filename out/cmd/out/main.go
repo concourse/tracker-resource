@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/concourse/tracker-resource/out"
@@ -15,14 +16,7 @@ import (
 	"github.com/xoebus/go-tracker/resources"
 )
 
-func main() {
-	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "usage: %s <sources directory>\n", os.Args[0])
-		os.Exit(1)
-	}
-
-	sources := os.Args[1]
-
+func buildRequest() out.OutRequest {
 	var request out.OutRequest
 
 	err := json.NewDecoder(os.Stdin).Decode(&request)
@@ -30,24 +24,30 @@ func main() {
 		fatal("reading request", err)
 	}
 
+	return request
+}
+
+func main() {
+	if len(os.Args) < 2 {
+		sayf("usage: %s <sources directory>\n", os.Args[0])
+		os.Exit(1)
+	}
+
+	sources := os.Args[1]
+	request := buildRequest()
+
 	trackerURL := request.Source.TrackerURL
-	fmt.Fprintf(os.Stderr, "Tracker URL: %s\n", trackerURL)
-
 	token := request.Source.Token
-	fmt.Fprintf(os.Stderr, "Tracker Token: %s\n", token)
-
 	projectID, err := strconv.Atoi(request.Source.ProjectID)
 	if err != nil {
 		fatal("converting the project ID to an integer", err)
 	}
-	fmt.Fprintf(os.Stderr, "Tracker Project ID: %d\n", projectID)
 
 	repos := request.Params.Repos
-	fmt.Fprintf(os.Stderr, "Repositories: %+v\n", repos)
+	sayf("Scanning repositories: %s\n", strings.Join(repos, ", "))
 
 	tracker.DefaultURL = trackerURL
 	client := tracker.NewClient(token).InProject(projectID)
-
 	stories, err := client.Stories()
 	if err != nil {
 		fatal("getting list of stories", err)
@@ -64,16 +64,16 @@ func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources 
 	for _, repo := range repos {
 		dir := filepath.Join(sources, repo)
 
-		fmt.Fprintf(os.Stderr, "checking in dir %s\n", dir)
+		sayf("checking in dir %s\n", dir)
 
 		outputFixes := checkOutput("fixes", story, dir)
 		outputFinishes := checkOutput("finishes", story, dir)
 
 		if len(outputFixes) > 0 || len(outputFinishes) > 0 {
-			fmt.Fprintf(os.Stderr, "found the story, delivering it!: %d\n", story.ID)
+			sayf("found the story, delivering it!: %d\n", story.ID)
 			client.DeliverStory(story.ID)
 		} else {
-			fmt.Fprintf(os.Stderr, "could not find story for delivery: %d\n", story.ID)
+			sayf("could not find story for delivery: %d\n", story.ID)
 		}
 	}
 }
@@ -84,7 +84,7 @@ func checkOutput(verb string, story resources.Story, dir string) []byte {
 
 	output, err := command.CombinedOutput()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "git logging failed for story: %d: %s\n", story.ID, err)
+		sayf("git logging failed for story: %d: %s\n", story.ID, err)
 
 		return nil
 	}
@@ -100,7 +100,11 @@ func outputResponse() {
 	})
 }
 
+func sayf(message string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, message, args...)
+}
+
 func fatal(doing string, err error) {
-	fmt.Fprintf(os.Stderr, "error %s: %s\n", doing, err)
+	sayf("error %s: %s\n", doing, err)
 	os.Exit(1)
 }
