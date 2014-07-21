@@ -101,9 +101,17 @@ var _ = Describe("In", func() {
 			// does not output credentials
 			Ω(session.Err).ShouldNot(Say("abc"))
 
-			Ω(session.Err).Should(Say("could not find story for delivery: 565"))
-			Ω(session.Err).Should(Say("delivering it!: 123456"))
-			Ω(session.Err).Should(Say("delivering it!: 123457"))
+			Ω(session.Err).Should(Say("Checking for finished story: .*#565"))
+			Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
+			Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+
+			Ω(session.Err).Should(Say("Checking for finished story: .*#123456"))
+			Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
+			Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+
+			Ω(session.Err).Should(Say("Checking for finished story: .*#123457"))
+			Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
+			Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
 
 			// Output
 			err = json.Unmarshal(session.Out.Contents(), &response)

@@ -12,6 +12,7 @@ import (
 
 	"github.com/concourse/tracker-resource/out"
 
+	"github.com/mitchellh/colorstring"
 	"github.com/xoebus/go-tracker"
 	"github.com/xoebus/go-tracker/resources"
 )
@@ -61,21 +62,25 @@ func main() {
 }
 
 func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources string, repos []string) {
+	sayf(colorstring.Color("Checking for finished story: [blue]#%d\n"), story.ID)
+
 	for _, repo := range repos {
 		dir := filepath.Join(sources, repo)
 
-		sayf("checking in dir %s\n", dir)
+		sayf(colorstring.Color("  [white][bold]%s[default]...%s"), repo, strings.Repeat(" ", 80-2-3-10-len(repo)))
 
 		outputFixes := checkOutput("fixes", story, dir)
 		outputFinishes := checkOutput("finishes", story, dir)
 
 		if len(outputFixes) > 0 || len(outputFinishes) > 0 {
-			sayf("found the story, delivering it!: %d\n", story.ID)
+			sayf(colorstring.Color("[green]DELIVERING\n"))
 			client.DeliverStory(story.ID)
 		} else {
-			sayf("could not find story for delivery: %d\n", story.ID)
+			sayf(colorstring.Color("  [yellow]SKIPPING\n"))
 		}
 	}
+
+	sayf("\n")
 }
 
 func checkOutput(verb string, story resources.Story, dir string) []byte {
