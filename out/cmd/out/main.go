@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/concourse/tracker-resource/out"
@@ -35,7 +36,10 @@ func main() {
 	token := request.Source.Token
 	fmt.Fprintf(os.Stderr, "Tracker Token: %s\n", token)
 
-	projectID := request.Source.ProjectID
+	projectID, err := strconv.Atoi(request.Source.ProjectID)
+	if err != nil {
+		fatal("converting the project ID to an integer", err)
+	}
 	fmt.Fprintf(os.Stderr, "Tracker Project ID: %d\n", projectID)
 
 	repos := request.Params.Repos

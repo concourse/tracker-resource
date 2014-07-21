@@ -54,7 +54,7 @@ var _ = Describe("In", func() {
 				Source: out.Source{
 					Token:      "abc",
 					TrackerURL: server.URL(),
-					ProjectID:  1234,
+					ProjectID:  "1234",
 				},
 				Params: out.Params{
 					Repos: []string{
