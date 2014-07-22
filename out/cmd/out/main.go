@@ -69,8 +69,8 @@ func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources 
 
 		sayf(colorstring.Color("  [white][bold]%s[default]...%s"), repo, strings.Repeat(" ", 80-2-3-10-len(repo)))
 
-		outputFixes := checkOutput("fixes", story, dir)
-		outputFinishes := checkOutput("finishes", story, dir)
+		outputFixes := checkGitLog("fixes", story, dir)
+		outputFinishes := checkGitLog("finishes", story, dir)
 
 		if len(outputFixes) > 0 || len(outputFinishes) > 0 {
 			sayf(colorstring.Color("[green]DELIVERING\n"))
@@ -83,7 +83,7 @@ func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources 
 	sayf("\n")
 }
 
-func checkOutput(verb string, story resources.Story, dir string) []byte {
+func checkGitLog(verb string, story resources.Story, dir string) []byte {
 	command := exec.Command("git", "log", "--grep", fmt.Sprintf("%s #%d", verb, story.ID))
 	command.Dir = dir
 
@@ -110,6 +110,6 @@ func sayf(message string, args ...interface{}) {
 }
 
 func fatal(doing string, err error) {
-	sayf("error %s: %s\n", doing, err)
+	sayf(colorstring.Color("[red]error %s: %s\n"), doing, err)
 	os.Exit(1)
 }
