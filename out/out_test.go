@@ -2,6 +2,7 @@ package out_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -47,14 +48,17 @@ var _ = Describe("In", func() {
 
 		var server *ghttp.Server
 
+		trackerToken := "abc"
+		projectId := "1234"
+
 		BeforeEach(func() {
 			server = ghttp.NewServer()
 
 			request = out.OutRequest{
 				Source: out.Source{
-					Token:      "abc",
+					Token:      trackerToken,
 					TrackerURL: server.URL(),
-					ProjectID:  "1234",
+					ProjectID:  projectId,
 				},
 				Params: out.Params{
 					Repos: []string{
@@ -64,42 +68,26 @@ var _ = Describe("In", func() {
 				},
 			}
 			response = out.OutResponse{}
+
+			server.AppendHandlers(
+				listStoriesHandler(),
+				deliverStoryHandler(trackerToken, projectId, 123456),
+				deliverStoryHandler(trackerToken, projectId, 123457),
+			)
 		})
 
 		AfterEach(func() {
 			server.Close()
 		})
 
+		It("does not output credentials", func() {
+			session := runCommand(outCmd, request)
+
+			Ω(session.Err).ShouldNot(Say(trackerToken))
+		})
+
 		It("finds finished stories that are mentioned in recent git commits", func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/services/v5/projects/1234/stories"),
-					ghttp.VerifyHeaderKV("X-TrackerToken", "abc"),
-					ghttp.RespondWith(http.StatusOK, Fixture("stories.json")),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("PUT", "/services/v5/projects/1234/stories/123456"),
-					ghttp.VerifyHeaderKV("X-TrackerToken", "abc"),
-					ghttp.VerifyJSON(`{"current_state":"delivered"}`),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("PUT", "/services/v5/projects/1234/stories/123457"),
-					ghttp.VerifyHeaderKV("X-TrackerToken", "abc"),
-					ghttp.VerifyJSON(`{"current_state":"delivered"}`),
-				),
-			)
-
-			stdin, err := outCmd.StdinPipe()
-			Ω(err).ShouldNot(HaveOccurred())
-
-			session, err := Start(outCmd, GinkgoWriter, GinkgoWriter)
-			Ω(err).ShouldNot(HaveOccurred())
-			err = json.NewEncoder(stdin).Encode(request)
-			Ω(err).ShouldNot(HaveOccurred())
-			Eventually(session).Should(Exit(0))
-
-			// does not output credentials
-			Ω(session.Err).ShouldNot(Say("abc"))
+			session := runCommand(outCmd, request)
 
 			Ω(session.Err).Should(Say("Checking for finished story: .*#565"))
 			Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
@@ -112,14 +100,46 @@ var _ = Describe("In", func() {
 			Ω(session.Err).Should(Say("Checking for finished story: .*#123457"))
 			Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
 			Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
+		})
 
-			// Output
-			err = json.Unmarshal(session.Out.Contents(), &response)
+		It("outputs the current time", func() {
+			session := runCommand(outCmd, request)
+
+			err := json.Unmarshal(session.Out.Contents(), &response)
 			Ω(err).ShouldNot(HaveOccurred())
 			Ω(response.Version.Time).Should(BeTemporally("~", time.Now(), time.Second))
 		})
 	})
 })
+
+func runCommand(outCmd *exec.Cmd, request out.OutRequest) *Session {
+	stdin, err := outCmd.StdinPipe()
+	Ω(err).ShouldNot(HaveOccurred())
+
+	session, err := Start(outCmd, GinkgoWriter, GinkgoWriter)
+	Ω(err).ShouldNot(HaveOccurred())
+	err = json.NewEncoder(stdin).Encode(request)
+	Ω(err).ShouldNot(HaveOccurred())
+	Eventually(session).Should(Exit(0))
+
+	return session
+}
+
+func listStoriesHandler() http.HandlerFunc {
+	return ghttp.CombineHandlers(
+		ghttp.VerifyRequest("GET", "/services/v5/projects/1234/stories"),
+		ghttp.VerifyHeaderKV("X-TrackerToken", "abc"),
+		ghttp.RespondWith(http.StatusOK, Fixture("stories.json")),
+	)
+}
+
+func deliverStoryHandler(token string, projectId string, storyId int) http.HandlerFunc {
+	return ghttp.CombineHandlers(
+		ghttp.VerifyRequest("PUT", fmt.Sprintf("/services/v5/projects/%s/stories/%d", projectId, storyId)),
+		ghttp.VerifyHeaderKV("X-TrackerToken", token),
+		ghttp.VerifyJSON(`{"current_state":"delivered"}`),
+	)
+}
 
 func setupTestEnvironment(path string) {
 	cmd := exec.Command(filepath.Join("scripts/setup.sh"), path)
