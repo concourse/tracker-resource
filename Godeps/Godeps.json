@@ -6,6 +6,10 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/mitchellh/colorstring",
+			"Rev": "9797cb57e314a5a2c4d735ff060d5c6dcba57749"
+		},
+		{
 			"ImportPath": "github.com/onsi/ginkgo",
 			"Comment": "v1.0.0-23-g939c01c",
 			"Rev": "939c01cdcec896f69e7e0e5787934e32972419be"
