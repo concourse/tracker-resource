@@ -20,7 +20,7 @@ import (
 	"github.com/concourse/tracker-resource/out"
 )
 
-var _ = Describe("In", func() {
+var _ = Describe("Out", func() {
 	var tmpdir string
 
 	var outCmd *exec.Cmd
