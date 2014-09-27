@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e -x
+
+go build -o built-check check/cmd/check/main.go
+go build -o built-out out/cmd/out/main.go

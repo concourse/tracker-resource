@@ -1,5 +1,8 @@
 ---
-image: docker:///mischief/docker-golang
+image: docker:///concourse/static-golang
+
+paths:
+  tracker-resource: gopath/src/github.com/concourse/tracker-resource
 
 run:
-  path: tracker-resource/scripts/test
+  path: gopath/src/github.com/concourse/tracker-resource/scripts/test
