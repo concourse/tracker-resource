@@ -1,8 +1,9 @@
 ---
 image: docker:///concourse/static-golang
 
-paths:
-  tracker-resource: gopath/src/github.com/concourse/tracker-resource
+inputs:
+  - name: tracker-resource
+    paths: gopath/src/github.com/concourse/tracker-resource
 
 run:
   path: gopath/src/github.com/concourse/tracker-resource/scripts/test
