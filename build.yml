@@ -3,7 +3,7 @@ image: docker:///concourse/static-golang
 
 inputs:
   - name: tracker-resource
-    paths: gopath/src/github.com/concourse/tracker-resource
+    path: gopath/src/github.com/concourse/tracker-resource
 
 run:
   path: gopath/src/github.com/concourse/tracker-resource/scripts/test
