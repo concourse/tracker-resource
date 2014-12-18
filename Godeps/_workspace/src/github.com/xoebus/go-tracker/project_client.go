@@ -4,34 +4,53 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/xoebus/go-tracker/resources"
 )
 
 type ProjectClient struct {
-	id     int
-	client Client
+	id   int
+	conn connection
 }
 
-func (p ProjectClient) Stories() ([]resources.Story, error) {
-	var stories []resources.Story
+type State string
 
-	request, err := p.createRequest("GET", "/stories?date_format=millis&with_state=finished")
+const (
+	StateUnscheduled = "unscheduled"
+	StatePlanned     = "planned"
+	StateStarted     = "started"
+	StateFinished    = "finished"
+	StateDelivered   = "delivered"
+	StateAccepted    = "accepted"
+	StateRejected    = "rejected"
+)
+
+type StoriesQuery struct {
+	State State
+}
+
+func (query StoriesQuery) Query() url.Values {
+	params := url.Values{}
+	params.Set("date_format", "millis")
+
+	if query.State != "" {
+		params.Set("with_state", string(query.State))
+	}
+
+	return params
+}
+
+func (p ProjectClient) Stories(query StoriesQuery) (stories []resources.Story, err error) {
+	params := query.Query().Encode()
+	request, err := p.createRequest("GET", "/stories?"+params)
 	if err != nil {
 		return stories, err
 	}
 
-	response, err := p.client.sendRequest(request)
-	if err != nil {
-		return stories, err
-	}
-
-	if err := p.client.decodeResponse(response, &stories); err != nil {
-		return stories, err
-	}
-
-	return stories, nil
+	err = p.conn.Do(request, &stories)
+	return stories, err
 }
 
 func (p ProjectClient) DeliverStory(storyId int) error {
@@ -41,23 +60,17 @@ func (p ProjectClient) DeliverStory(storyId int) error {
 		return err
 	}
 
-	request.Header.Add("Content-Type", "application/json")
-	request.Body = ioutil.NopCloser(strings.NewReader(`{"current_state":"delivered"}`))
+	p.addJSONBody(request, `{"current_state":"delivered"}`)
 
-	_, err = p.client.sendRequest(request)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return p.conn.Do(request, nil)
 }
 
 func (p ProjectClient) createRequest(method string, path string) (*http.Request, error) {
 	projectPath := fmt.Sprintf("/projects/%d%s", p.id, path)
-	request, err := p.client.createRequest(method, projectPath)
-	if err != nil {
-		return nil, err
-	}
+	return p.conn.CreateRequest(method, projectPath)
+}
 
-	return request, nil
+func (p ProjectClient) addJSONBody(request *http.Request, body string) {
+	request.Header.Add("Content-Type", "application/json")
+	request.Body = ioutil.NopCloser(strings.NewReader(body))
 }

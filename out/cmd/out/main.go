@@ -49,7 +49,11 @@ func main() {
 
 	tracker.DefaultURL = trackerURL
 	client := tracker.NewClient(token).InProject(projectID)
-	stories, err := client.Stories()
+
+	query := tracker.StoriesQuery{
+		State: tracker.StateFinished,
+	}
+	stories, err := client.Stories(query)
 	if err != nil {
 		fatal("getting list of stories", err)
 	}
