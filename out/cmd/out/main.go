@@ -92,7 +92,7 @@ func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources 
 }
 
 func checkGitLog(verb string, story resources.Story, dir string) []byte {
-	command := exec.Command("git", "log", "--grep", fmt.Sprintf("%s #%d", verb, story.ID))
+	command := exec.Command("git", "log", "-i", "--grep", fmt.Sprintf("%s #%d", verb, story.ID))
 	command.Dir = dir
 
 	output, err := command.CombinedOutput()

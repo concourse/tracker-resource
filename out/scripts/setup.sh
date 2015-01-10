@@ -31,7 +31,7 @@ pushd $DIR/git
 
 	touch file.txt
 	git add file.txt
-	git commit -m "add file [finishes #123456]"
+	git commit -m "add file [Finishes #123456]"
 popd
 
 # git2: git harder directory
