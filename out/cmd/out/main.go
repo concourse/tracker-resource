@@ -38,6 +38,10 @@ func main() {
 	request := buildRequest()
 
 	trackerURL := request.Source.TrackerURL
+	if trackerURL == "" {
+		trackerURL = "https://www.pivotaltracker.com"
+	}
+
 	token := request.Source.Token
 	projectID, err := strconv.Atoi(request.Source.ProjectID)
 	if err != nil {
