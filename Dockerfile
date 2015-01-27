@@ -1,7 +1,7 @@
-FROM gliderlabs/alpine
+FROM concourse/busyboxplus:git
 
-RUN apk-install ca-certificates
-RUN apk-install git
+# satisfy go crypto/x509
+RUN cat /etc/ssl/certs/*.pem > /etc/ssl/certs/ca-certificates.crt
 
 ADD built-check /opt/resource/check
 ADD built-out /opt/resource/out
