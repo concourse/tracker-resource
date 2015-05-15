@@ -3,4 +3,5 @@
 set -e -x
 
 go build -o built-check check/cmd/check/main.go
+go build -o built-in in/cmd/in/main.go
 go build -o built-out out/cmd/out/main.go
