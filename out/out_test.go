@@ -17,6 +17,7 @@ import (
 
 	"github.com/onsi/gomega/ghttp"
 
+	"github.com/concourse/tracker-resource"
 	"github.com/concourse/tracker-resource/out"
 )
 
@@ -55,7 +56,7 @@ var _ = Describe("Out", func() {
 			server = ghttp.NewServer()
 
 			request = out.OutRequest{
-				Source: out.Source{
+				Source: resource.Source{
 					Token:      trackerToken,
 					TrackerURL: server.URL(),
 					ProjectID:  projectId,

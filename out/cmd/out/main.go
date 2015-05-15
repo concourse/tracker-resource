@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/concourse/tracker-resource"
 	"github.com/concourse/tracker-resource/out"
 
 	"github.com/mitchellh/colorstring"
@@ -107,7 +108,7 @@ func checkGitLog(verb string, story resources.Story, dir string) []byte {
 
 func outputResponse() {
 	json.NewEncoder(os.Stdout).Encode(out.OutResponse{
-		Version: out.Version{
+		Version: resource.Version{
 			Time: time.Now(),
 		},
 	})
