@@ -1,7 +1,5 @@
 package tracker
 
-import "github.com/xoebus/go-tracker/resources"
-
 var DefaultURL = "https://www.pivotaltracker.com"
 
 type Client struct {
@@ -14,13 +12,13 @@ func NewClient(token string) *Client {
 	}
 }
 
-func (c Client) Me() (me resources.Me, err error) {
+func (c Client) Me() (me Me, err error) {
 	request, err := c.conn.CreateRequest("GET", "/me")
 	if err != nil {
 		return me, err
 	}
 
-	err = c.conn.Do(request, &me)
+	_, err = c.conn.Do(request, &me)
 
 	return me, err
 }

@@ -1,13 +1,13 @@
 package tracker
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strings"
-
-	"github.com/xoebus/go-tracker/resources"
 )
 
 type ProjectClient struct {
@@ -15,42 +15,47 @@ type ProjectClient struct {
 	conn connection
 }
 
-type State string
-
-const (
-	StateUnscheduled = "unscheduled"
-	StatePlanned     = "planned"
-	StateStarted     = "started"
-	StateFinished    = "finished"
-	StateDelivered   = "delivered"
-	StateAccepted    = "accepted"
-	StateRejected    = "rejected"
-)
-
-type StoriesQuery struct {
-	State State
-}
-
-func (query StoriesQuery) Query() url.Values {
-	params := url.Values{}
-	params.Set("date_format", "millis")
-
-	if query.State != "" {
-		params.Set("with_state", string(query.State))
-	}
-
-	return params
-}
-
-func (p ProjectClient) Stories(query StoriesQuery) (stories []resources.Story, err error) {
+func (p ProjectClient) Stories(query StoriesQuery) ([]Story, Pagination, error) {
 	params := query.Query().Encode()
+
 	request, err := p.createRequest("GET", "/stories?"+params)
 	if err != nil {
-		return stories, err
+		return nil, Pagination{}, err
 	}
 
-	err = p.conn.Do(request, &stories)
-	return stories, err
+	var stories []Story
+	pagination, err := p.conn.Do(request, &stories)
+	if err != nil {
+		return nil, Pagination{}, err
+	}
+
+	return stories, pagination, err
+}
+
+func (p ProjectClient) StoryActivity(storyId int, query ActivityQuery) (activities []Activity, err error) {
+	url := fmt.Sprintf("/stories/%d/activity", storyId)
+	params := query.Query().Encode()
+	request, err := p.createRequest("GET", url+"?"+params)
+	if err != nil {
+		return activities, err
+	}
+
+	_, err = p.conn.Do(request, &activities)
+	return activities, err
+}
+
+func (p ProjectClient) DeliverStoryWithComment(storyId int, comment string) error {
+	url := fmt.Sprintf("/stories/%d", storyId)
+	request, err := p.createRequest("PUT", url)
+	if err != nil {
+		return err
+	}
+
+	body := fmt.Sprintf(`{"current_state":"delivered", "comment":"%s"}`, comment)
+	p.addJSONBody(request, body)
+
+	_, err = p.conn.Do(request, nil)
+	return err
 }
 
 func (p ProjectClient) DeliverStory(storyId int) error {
@@ -62,7 +67,24 @@ func (p ProjectClient) DeliverStory(storyId int) error {
 
 	p.addJSONBody(request, `{"current_state":"delivered"}`)
 
-	return p.conn.Do(request, nil)
+	_, err = p.conn.Do(request, nil)
+	return err
+}
+
+func (p ProjectClient) CreateStory(story Story) (Story, error) {
+	request, err := p.createRequest("POST", "/stories")
+	if err != nil {
+		return Story{}, err
+	}
+
+	buffer := &bytes.Buffer{}
+	json.NewEncoder(buffer).Encode(story)
+
+	p.addJSONBodyReader(request, buffer)
+
+	var createdStory Story
+	_, err = p.conn.Do(request, &createdStory)
+	return createdStory, err
 }
 
 func (p ProjectClient) createRequest(method string, path string) (*http.Request, error) {
@@ -70,7 +92,11 @@ func (p ProjectClient) createRequest(method string, path string) (*http.Request,
 	return p.conn.CreateRequest(method, projectPath)
 }
 
-func (p ProjectClient) addJSONBody(request *http.Request, body string) {
+func (p ProjectClient) addJSONBodyReader(request *http.Request, body io.Reader) {
 	request.Header.Add("Content-Type", "application/json")
-	request.Body = ioutil.NopCloser(strings.NewReader(body))
+	request.Body = ioutil.NopCloser(body)
+}
+
+func (p ProjectClient) addJSONBody(request *http.Request, body string) {
+	p.addJSONBodyReader(request, strings.NewReader(body))
 }

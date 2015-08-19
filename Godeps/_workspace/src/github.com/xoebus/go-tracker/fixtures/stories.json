@@ -2,8 +2,9 @@
    {
        "kind": "story",
        "id": 560,
-       "created_at": 1401796800000,
-       "updated_at": 1401796800000,
+       "created_at": "2015-07-20T22:50:50Z",
+       "updated_at": "2015-07-20T22:51:50Z",
+       "accepted_at": "2015-07-20T22:52:50Z",
        "story_type": "bug",
        "name": "Tractor beam loses power intermittently",
        "current_state": "finished",
@@ -15,13 +16,15 @@
        ],
        "labels":
        [
+         { "id": 10, "project_id": 99, "name": "some-label" },
+         { "id": 11, "project_id": 99, "name": "some-other-label" }
        ]
    },
    {
        "kind": "story",
        "id": 565,
-       "created_at": 1401796800000,
-       "updated_at": 1401796800000,
+       "created_at": "2015-07-20T22:50:50Z",
+       "updated_at": "2015-07-20T22:50:50Z",
        "story_type": "chore",
        "name": "Repair CommLink",
        "description": "It's malfunctioning.",
@@ -39,16 +42,16 @@
                "project_id": 99,
                "kind": "label",
                "name": "mnt",
-               "created_at": 1401796800000,
-               "updated_at": 1401796800000
+               "created_at": "2015-07-20T22:50:50Z",
+               "updated_at": "2015-07-20T22:50:50Z"
            }
        ]
    },
    {
        "kind": "story",
        "id": 552,
-       "created_at": 1401796800000,
-       "updated_at": 1401796800000,
+       "created_at": "2015-07-20T22:50:50Z",
+       "updated_at": "2015-07-20T22:50:50Z",
        "deadline": 1401796805000,
        "story_type": "release",
        "name": "Battlestation fully operational",
@@ -67,8 +70,8 @@
    {
        "kind": "story",
        "id": 555,
-       "created_at": 1401796800000,
-       "updated_at": 1401796800000,
+       "created_at": "2015-07-20T22:50:50Z",
+       "updated_at": "2015-07-20T22:50:50Z",
        "estimate": 2,
        "story_type": "feature",
        "name": "Bring me the passengers",

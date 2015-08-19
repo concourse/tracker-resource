@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/concourse/tracker-resource",
-	"GoVersion": "go1.3",
+	"GoVersion": "go1.4.2",
 	"Packages": [
 		"./..."
 	],
@@ -20,7 +20,7 @@
 		},
 		{
 			"ImportPath": "github.com/xoebus/go-tracker",
-			"Rev": "7e343d2422b9902d3a40498c9c390380482826b7"
+			"Rev": "3741f40b62dac8246bd54540530adcda06fb8d3a"
 		}
 	]
 }

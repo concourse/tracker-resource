@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 type connection struct {
@@ -19,17 +20,61 @@ func newConnection(token string) connection {
 	}
 }
 
-func (c connection) Do(request *http.Request, response interface{}) error {
+type Pagination struct {
+	Total    int
+	Offset   int
+	Limit    int
+	Returned int
+}
+
+const paginationTotalHeader = "X-Tracker-Pagination-Total"
+const paginationOffsetHeader = "X-Tracker-Pagination-Offset"
+const paginationLimitHeader = "X-Tracker-Pagination-Limit"
+const paginationReturnedHeader = "X-Tracker-Pagination-Returned"
+
+func (c connection) Do(request *http.Request, response interface{}) (Pagination, error) {
 	resp, err := c.sendRequest(request)
 	if err != nil {
-		return err
+		return Pagination{}, err
+	}
+
+	defer resp.Body.Close()
+
+	pagination := Pagination{}
+
+	if val := resp.Header.Get(paginationTotalHeader); len(val) > 0 {
+		pagination.Total, err = strconv.Atoi(val)
+		if err != nil {
+			return Pagination{}, err
+		}
+	}
+
+	if val := resp.Header.Get(paginationOffsetHeader); len(val) > 0 {
+		pagination.Offset, err = strconv.Atoi(val)
+		if err != nil {
+			return Pagination{}, err
+		}
+	}
+
+	if val := resp.Header.Get(paginationLimitHeader); len(val) > 0 {
+		pagination.Limit, err = strconv.Atoi(val)
+		if err != nil {
+			return Pagination{}, err
+		}
+	}
+
+	if val := resp.Header.Get(paginationReturnedHeader); len(val) > 0 {
+		pagination.Returned, err = strconv.Atoi(val)
+		if err != nil {
+			return Pagination{}, err
+		}
 	}
 
 	if response != nil {
-		return c.decodeResponse(resp, response)
+		return pagination, c.decodeResponse(resp, response)
 	}
 
-	return nil
+	return pagination, nil
 }
 
 func (c connection) CreateRequest(method string, path string) (*http.Request, error) {
@@ -64,10 +109,5 @@ func (c connection) decodeResponse(response *http.Response, object interface{}) 
 		return fmt.Errorf("invalid json response: %s", err)
 	}
 
-	err := response.Body.Close()
-	if err != nil {
-		return fmt.Errorf("error closing response body: %s", err)
-	}
-
-	return nil
+	return response.Body.Close()
 }

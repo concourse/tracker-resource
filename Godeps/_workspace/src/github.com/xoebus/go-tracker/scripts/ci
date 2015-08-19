@@ -5,8 +5,5 @@ set -e
 # Tests
 ginkgo -r -succinct -cover -race -failOnPending
 
-# Check for unhandled errors
-errcheck -blank
-
 # Check for common mistakes
 go vet .
