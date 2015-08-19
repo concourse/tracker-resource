@@ -2,8 +2,8 @@
    {
        "kind": "story",
        "id": 565,
-       "created_at": 1401796800000,
-       "updated_at": 1401796800000,
+       "created_at": "2006-01-02T15:04:05Z",
+       "updated_at": "2006-01-02T15:04:05Z",
        "story_type": "chore",
        "name": "Repair CommLink",
        "description": "It's malfunctioning.",
@@ -21,17 +21,17 @@
                "project_id": 99,
                "kind": "label",
                "name": "mnt",
-               "created_at": 1401796800000,
-               "updated_at": 1401796800000
+               "created_at": "2006-01-02T15:04:05Z",
+               "updated_at": "2006-01-02T15:04:05Z"
            }
        ]
    },
    {
        "kind": "story",
        "id": 123456,
-       "created_at": 1401796800000,
-       "updated_at": 1401796800000,
-       "deadline": 1401796805000,
+       "created_at": "2006-01-02T15:04:05Z",
+       "updated_at": "2006-01-02T15:04:05Z",
+       "deadline": "2006-01-02T15:04:05Z",
        "story_type": "release",
        "name": "Battlestation fully operational",
        "description": "Everything is proceeding as I have foreseen.",
@@ -49,8 +49,8 @@
    {
        "kind": "story",
        "id": 123457,
-       "created_at": 1401796800000,
-       "updated_at": 1401796800000,
+       "created_at": "2006-01-02T15:04:05Z",
+       "updated_at": "2006-01-02T15:04:05Z",
        "estimate": 2,
        "story_type": "feature",
        "name": "Bring me the passengers",

@@ -15,7 +15,6 @@ import (
 
 	"github.com/mitchellh/colorstring"
 	"github.com/xoebus/go-tracker"
-	"github.com/xoebus/go-tracker/resources"
 )
 
 func buildRequest() out.OutRequest {
@@ -56,9 +55,9 @@ func main() {
 	client := tracker.NewClient(token).InProject(projectID)
 
 	query := tracker.StoriesQuery{
-		State: tracker.StateFinished,
+		State: tracker.StoryStateFinished,
 	}
-	stories, err := client.Stories(query)
+	stories, _, err := client.Stories(query)
 	if err != nil {
 		fatal("getting list of stories", err)
 	}
@@ -70,7 +69,7 @@ func main() {
 	outputResponse()
 }
 
-func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources string, repos []string) {
+func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources string, repos []string) {
 	sayf(colorstring.Color("Checking for finished story: [blue]#%d\n"), story.ID)
 
 	for _, repo := range repos {
@@ -92,7 +91,7 @@ func deliverIfDone(client tracker.ProjectClient, story resources.Story, sources 
 	sayf("\n")
 }
 
-func checkGitLog(verb string, story resources.Story, dir string) []byte {
+func checkGitLog(verb string, story tracker.Story, dir string) []byte {
 	command := exec.Command("git", "log", "-i", "--grep", fmt.Sprintf("%s #%d", verb, story.ID))
 	command.Dir = dir
 
