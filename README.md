@@ -25,18 +25,13 @@ You'll need a seperate resource for each Tracker project.
 
 ``` yaml
 - name: deploy
-  build: release/ci/deploy.yml
-  serial: true
-  inputs:
-    - resource: release
-    - resource: deployments
-  outputs:
-    - resource: tracker-output
-      params:
-        repos:
-          - release/src/project1
-          - release/src/project2
-          - release/src/project3
+  plan:
+  - get: git-repo-path
+  - ...
+  - put: tracker
+    params:
+      repos:
+      - git-repo-path
 ```
 
 The only parameter you need to submit to the resource on a per build basis are the paths to the git repositories which will contain the delivering commits.
