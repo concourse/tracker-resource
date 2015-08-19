@@ -70,10 +70,12 @@ var _ = Describe("Out", func() {
 			}
 			response = out.OutResponse{}
 
+			comment := "Delivered by Concourse"
+
 			server.AppendHandlers(
 				listStoriesHandler(),
-				deliverStoryHandler(trackerToken, projectId, 123456),
-				deliverStoryHandler(trackerToken, projectId, 123457),
+				deliverStoryHandler(trackerToken, projectId, 123456, comment),
+				deliverStoryHandler(trackerToken, projectId, 123457, comment),
 			)
 		})
 
@@ -134,11 +136,12 @@ func listStoriesHandler() http.HandlerFunc {
 	)
 }
 
-func deliverStoryHandler(token string, projectId string, storyId int) http.HandlerFunc {
+func deliverStoryHandler(token string, projectId string, storyId int, comment string) http.HandlerFunc {
+	body := fmt.Sprintf(`{"current_state":"delivered", "comment":"%s"}`, comment)
 	return ghttp.CombineHandlers(
 		ghttp.VerifyRequest("PUT", fmt.Sprintf("/services/v5/projects/%s/stories/%d", projectId, storyId)),
 		ghttp.VerifyHeaderKV("X-TrackerToken", token),
-		ghttp.VerifyJSON(`{"current_state":"delivered"}`),
+		ghttp.VerifyJSON(body),
 	)
 }
 

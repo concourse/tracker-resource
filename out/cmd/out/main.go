@@ -82,7 +82,7 @@ func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources st
 
 		if len(outputFixes) > 0 || len(outputFinishes) > 0 {
 			sayf(colorstring.Color("[green]DELIVERING\n"))
-			client.DeliverStory(story.ID)
+			client.DeliverStoryWithComment(story.ID, "Delivered by Concourse")
 		} else {
 			sayf(colorstring.Color("  [yellow]SKIPPING\n"))
 		}
