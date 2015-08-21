@@ -97,7 +97,7 @@ func (c connection) sendRequest(request *http.Request) (*http.Response, error) {
 		return nil, errors.New("invalid token")
 	}
 
-	if response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
 		return nil, fmt.Errorf("request failed (%d)", response.StatusCode)
 	}
 

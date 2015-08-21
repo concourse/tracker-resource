@@ -32,6 +32,10 @@ type Story struct {
 	AcceptedAt *time.Time `json:"accepted_at,omitempty"`
 }
 
+type Comment struct {
+	Text string `json:"text,omitempty"`
+}
+
 type Label struct {
 	ID        int `json:"id,omitempty"`
 	ProjectID int `json:"project_id,omitempty"`

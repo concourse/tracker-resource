@@ -260,19 +260,26 @@ var _ = Describe("Tracker Client", func() {
 		})
 
 		It("HTTP PUTs it in its place with a comment", func() {
-			comment := "some delivery comment"
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("PUT", "/services/v5/projects/99/stories/15225523"),
-					ghttp.VerifyJSON(`{"current_state":"delivered", "comment":"some delivery comment"}`),
+					ghttp.VerifyJSON(`{"current_state":"delivered"}`),
 					verifyTrackerToken(),
 
 					ghttp.RespondWith(http.StatusOK, ""),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", "/services/v5/projects/99/stories/15225523/comments"),
+					ghttp.VerifyJSON(`{"text":"some delive\"}ry comment with tricky text"}`),
+					verifyTrackerToken(),
+
+					ghttp.RespondWith(http.StatusCreated, ""),
 				),
 			)
 
 			client := tracker.NewClient("api-token")
 
+			comment := `some delive"}ry comment with tricky text`
 			err := client.InProject(99).DeliverStoryWithComment(15225523, comment)
 			Ω(err).ShouldNot(HaveOccurred())
 		})

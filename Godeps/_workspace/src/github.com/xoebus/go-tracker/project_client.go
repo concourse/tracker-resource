@@ -45,14 +45,23 @@ func (p ProjectClient) StoryActivity(storyId int, query ActivityQuery) (activiti
 }
 
 func (p ProjectClient) DeliverStoryWithComment(storyId int, comment string) error {
-	url := fmt.Sprintf("/stories/%d", storyId)
-	request, err := p.createRequest("PUT", url)
+	err := p.DeliverStory(storyId)
 	if err != nil {
 		return err
 	}
 
-	body := fmt.Sprintf(`{"current_state":"delivered", "comment":"%s"}`, comment)
-	p.addJSONBody(request, body)
+	url := fmt.Sprintf("/stories/%d/comments", storyId)
+	request, err := p.createRequest("POST", url)
+	if err != nil {
+		return err
+	}
+
+	buffer := &bytes.Buffer{}
+	json.NewEncoder(buffer).Encode(Comment{
+		Text: comment,
+	})
+
+	p.addJSONBodyReader(request, buffer)
 
 	_, err = p.conn.Do(request, nil)
 	return err
