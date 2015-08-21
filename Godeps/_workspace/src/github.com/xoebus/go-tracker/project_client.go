@@ -96,6 +96,17 @@ func (p ProjectClient) CreateStory(story Story) (Story, error) {
 	return createdStory, err
 }
 
+func (p ProjectClient) DeleteStory(storyId int) error {
+	url := fmt.Sprintf("/stories/%d", storyId)
+	request, err := p.createRequest("DELETE", url)
+	if err != nil {
+		return err
+	}
+
+	_, err = p.conn.Do(request, nil)
+	return err
+}
+
 func (p ProjectClient) createRequest(method string, path string) (*http.Request, error) {
 	projectPath := fmt.Sprintf("/projects/%d%s", p.id, path)
 	return p.conn.CreateRequest(method, projectPath)
