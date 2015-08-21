@@ -78,6 +78,10 @@ var _ = Describe("Out", func() {
 			}
 		})
 
+		AfterEach(func() {
+			deleteActualStory(projectId, actualTrackerToken, storyId)
+		})
+
 		It("finds finished stories that are mentioned in recent git commits", func() {
 			session := runCommand(outCmd, request)
 
@@ -232,4 +236,16 @@ func createActualStory(projectID string, trackerToken string) string {
 	story, err = client.CreateStory(story)
 	Ω(err).NotTo(HaveOccurred())
 	return strconv.Itoa(story.ID)
+}
+
+func deleteActualStory(projectID string, trackerToken string, storyId string) {
+	projectIDInt, err := strconv.Atoi(projectID)
+	Ω(err).NotTo(HaveOccurred())
+
+	storyIDInt, err := strconv.Atoi(storyId)
+	Ω(err).NotTo(HaveOccurred())
+
+	client := tracker.NewClient(trackerToken).InProject(projectIDInt)
+	err = client.DeleteStory(storyIDInt)
+	Ω(err).NotTo(HaveOccurred())
 }
