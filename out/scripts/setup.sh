@@ -3,6 +3,7 @@
 set -e
 
 DIR=$1
+ACTUAL_STORY_ID=$2
 
 # random file
 pushd $DIR
@@ -48,3 +49,21 @@ pushd $DIR/middle/git2
 
 	[fixes #123457]"
 popd
+
+if [ ! -z ${ACTUAL_STORY_ID} ]; then
+	echo "ACTUAL_STORY_ID: ${ACTUAL_STORY_ID}"
+	# git3: git with a vengence directory
+	mkdir -p $DIR/middle/git3
+	pushd $DIR/middle/git3
+		git init
+
+		git config user.email "concourse@example.com"
+		git config user.name "Concourse Tracker Resource"
+
+		echo "bugfix" > file.txt
+		git add file.txt
+		git commit -m "fix bug
+
+		[fixes #${ACTUAL_STORY_ID}]"
+	popd
+fi

@@ -8,12 +8,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
 	. "github.com/onsi/gomega/gexec"
+	"github.com/xoebus/go-tracker"
 
 	"github.com/onsi/gomega/ghttp"
 
@@ -21,8 +23,11 @@ import (
 	"github.com/concourse/tracker-resource/out"
 )
 
+var (
+	tmpdir string
+)
+
 var _ = Describe("Out", func() {
-	var tmpdir string
 
 	var outCmd *exec.Cmd
 
@@ -34,8 +39,6 @@ var _ = Describe("Out", func() {
 		err = os.MkdirAll(tmpdir, 0755)
 		Ω(err).ShouldNot(HaveOccurred())
 
-		setupTestEnvironment(tmpdir)
-
 		outCmd = exec.Command(outPath, tmpdir)
 	})
 
@@ -43,7 +46,47 @@ var _ = Describe("Out", func() {
 		os.RemoveAll(tmpdir)
 	})
 
-	Context("when executed", func() {
+	Describe("integration with the real Tracker API", func() {
+		var (
+			request            out.OutRequest
+			storyId            string
+			actualTrackerToken string
+		)
+
+		projectId := "1412996"
+
+		BeforeEach(func() {
+			actualTrackerToken = os.Getenv("TRACKER_TOKEN")
+			if actualTrackerToken == "" {
+				Fail("TRACKER_TOKEN must be provided.")
+			}
+
+			storyId = createActualStory(projectId, actualTrackerToken)
+			setupTestEnvironmentWithActualStoryID(tmpdir, storyId)
+
+			request = out.OutRequest{
+				Source: resource.Source{
+					Token:      actualTrackerToken,
+					TrackerURL: "https://www.pivotaltracker.com",
+					ProjectID:  projectId,
+				},
+				Params: out.Params{
+					Repos: []string{
+						"middle/git3",
+					},
+				},
+			}
+		})
+
+		It("finds finished stories that are mentioned in recent git commits", func() {
+			session := runCommand(outCmd, request)
+
+			Ω(session.Err).Should(Say(fmt.Sprintf("Checking for finished story: .*#%s", storyId)))
+			Ω(session.Err).Should(Say("middle/git3.*... .*DELIVERING"))
+		})
+	})
+
+	Context("when executed against a mock URL", func() {
 		var request out.OutRequest
 		var response out.OutResponse
 
@@ -53,6 +96,8 @@ var _ = Describe("Out", func() {
 		projectId := "1234"
 
 		BeforeEach(func() {
+			setupTestEnvironment(tmpdir)
+
 			server = ghttp.NewServer()
 
 			request = out.OutRequest{
@@ -73,9 +118,11 @@ var _ = Describe("Out", func() {
 			comment := "Delivered by Concourse"
 
 			server.AppendHandlers(
-				listStoriesHandler(),
-				deliverStoryHandler(trackerToken, projectId, 123456, comment),
-				deliverStoryHandler(trackerToken, projectId, 123457, comment),
+				listStoriesHandler(trackerToken),
+				deliverStoryHandler(trackerToken, projectId, 123456),
+				deliverStoryCommentHandler(trackerToken, projectId, 123456, comment),
+				deliverStoryHandler(trackerToken, projectId, 123457),
+				deliverStoryCommentHandler(trackerToken, projectId, 123457, comment),
 			)
 		})
 
@@ -116,6 +163,7 @@ var _ = Describe("Out", func() {
 })
 
 func runCommand(outCmd *exec.Cmd, request out.OutRequest) *Session {
+	timeout := 10 * time.Second
 	stdin, err := outCmd.StdinPipe()
 	Ω(err).ShouldNot(HaveOccurred())
 
@@ -123,33 +171,65 @@ func runCommand(outCmd *exec.Cmd, request out.OutRequest) *Session {
 	Ω(err).ShouldNot(HaveOccurred())
 	err = json.NewEncoder(stdin).Encode(request)
 	Ω(err).ShouldNot(HaveOccurred())
-	Eventually(session).Should(Exit(0))
+	Eventually(session, timeout).Should(Exit(0))
 
 	return session
 }
 
-func listStoriesHandler() http.HandlerFunc {
+func listStoriesHandler(trackerToken string) http.HandlerFunc {
 	return ghttp.CombineHandlers(
 		ghttp.VerifyRequest("GET", "/services/v5/projects/1234/stories"),
-		ghttp.VerifyHeaderKV("X-TrackerToken", "abc"),
+		ghttp.VerifyHeaderKV("X-TrackerToken", trackerToken),
 		ghttp.RespondWith(http.StatusOK, Fixture("stories.json")),
 	)
 }
 
-func deliverStoryHandler(token string, projectId string, storyId int, comment string) http.HandlerFunc {
-	body := fmt.Sprintf(`{"current_state":"delivered", "comment":"%s"}`, comment)
+func deliverStoryCommentHandler(token string, projectId string, storyId int, comment string) http.HandlerFunc {
+	body := fmt.Sprintf(`{"text":"%s"}`, comment)
 	return ghttp.CombineHandlers(
-		ghttp.VerifyRequest("PUT", fmt.Sprintf("/services/v5/projects/%s/stories/%d", projectId, storyId)),
-		ghttp.VerifyHeaderKV("X-TrackerToken", token),
+		ghttp.VerifyRequest(
+			"POST",
+			fmt.Sprintf("/services/v5/projects/%s/stories/%d/comments", projectId, storyId),
+		), ghttp.VerifyHeaderKV("X-TrackerToken", token),
+		ghttp.VerifyJSON(body),
+	)
+}
+
+func deliverStoryHandler(token string, projectId string, storyId int) http.HandlerFunc {
+	body := `{"current_state":"delivered"}`
+	return ghttp.CombineHandlers(
+		ghttp.VerifyRequest(
+			"PUT",
+			fmt.Sprintf("/services/v5/projects/%s/stories/%d", projectId, storyId),
+		), ghttp.VerifyHeaderKV("X-TrackerToken", token),
 		ghttp.VerifyJSON(body),
 	)
 }
 
 func setupTestEnvironment(path string) {
-	cmd := exec.Command(filepath.Join("scripts/setup.sh"), path)
+	setupTestEnvironmentWithActualStoryID(path, "")
+}
+
+func setupTestEnvironmentWithActualStoryID(path string, storyId string) {
+	cmd := exec.Command(filepath.Join("scripts/setup.sh"), path, storyId)
 	cmd.Stdout = GinkgoWriter
 	cmd.Stderr = GinkgoWriter
 
 	err := cmd.Run()
 	Ω(err).ShouldNot(HaveOccurred())
+}
+
+func createActualStory(projectID string, trackerToken string) string {
+	projectIDInt, err := strconv.Atoi(projectID)
+	Ω(err).NotTo(HaveOccurred())
+
+	client := tracker.NewClient(trackerToken).InProject(projectIDInt)
+	story := tracker.Story{
+		Name:  "concourse test story",
+		Type:  tracker.StoryTypeBug,
+		State: tracker.StoryStateFinished,
+	}
+	story, err = client.CreateStory(story)
+	Ω(err).NotTo(HaveOccurred())
+	return strconv.Itoa(story.ID)
 }

@@ -10,7 +10,9 @@ import (
 	"github.com/onsi/gomega/gexec"
 )
 
-var outPath string
+var (
+	outPath string
+)
 
 var _ = BeforeSuite(func() {
 	var err error
