@@ -23,13 +23,11 @@ import (
 	"github.com/concourse/tracker-resource/out"
 )
 
-var (
-	tmpdir string
-)
-
 var _ = Describe("Out", func() {
-
-	var outCmd *exec.Cmd
+	var (
+		outCmd *exec.Cmd
+		tmpdir string
+	)
 
 	BeforeEach(func() {
 		var err error
@@ -163,10 +161,41 @@ var _ = Describe("Out", func() {
 			Ω(err).ShouldNot(HaveOccurred())
 			Ω(response.Version.Time).Should(BeTemporally("~", time.Now(), time.Second))
 		})
+
+		Context("when a comment file is specified", func() {
+			It("should make a comment with the file's contents", func() {
+				commentPath := "tracker-resource-comment"
+				request.Params.CommentPath = commentPath
+				err := ioutil.WriteFile(filepath.Join(tmpdir, commentPath), []byte("some custom comment"), os.ModePerm)
+				Ω(err).ShouldNot(HaveOccurred())
+
+				server.SetHandler(2, deliverStoryCommentHandler(trackerToken, projectId, 123456, "some custom comment"))
+				server.SetHandler(4, deliverStoryCommentHandler(trackerToken, projectId, 123457, "some custom comment"))
+
+				session := runCommand(outCmd, request)
+				Ω(session.Err).Should(Say("Checking for finished story: .*#123456"))
+				Ω(session.Err).Should(Say("Checking for finished story: .*#123457"))
+
+				os.Remove(request.Params.CommentPath)
+			})
+		})
+
+		Context("when the comment file does not exist", func() {
+			It("should return a fatal error", func() {
+				request.Params.CommentPath = "some-non-existent-file"
+
+				session := runCommandExpectingStatus(outCmd, request, 1)
+				Ω(session.Err).Should(Say("error reading comment file: open"))
+			})
+		})
 	})
 })
 
 func runCommand(outCmd *exec.Cmd, request out.OutRequest) *Session {
+	return runCommandExpectingStatus(outCmd, request, 0)
+}
+
+func runCommandExpectingStatus(outCmd *exec.Cmd, request out.OutRequest, status int) *Session {
 	timeout := 10 * time.Second
 	stdin, err := outCmd.StdinPipe()
 	Ω(err).ShouldNot(HaveOccurred())
@@ -175,7 +204,7 @@ func runCommand(outCmd *exec.Cmd, request out.OutRequest) *Session {
 	Ω(err).ShouldNot(HaveOccurred())
 	err = json.NewEncoder(stdin).Encode(request)
 	Ω(err).ShouldNot(HaveOccurred())
-	Eventually(session, timeout).Should(Exit(0))
+	Eventually(session, timeout).Should(Exit(status))
 
 	return session
 }

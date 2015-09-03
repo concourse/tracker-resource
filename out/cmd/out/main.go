@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -49,6 +50,15 @@ func main() {
 	}
 
 	repos := request.Params.Repos
+	commentPath := request.Params.CommentPath
+
+	comment := []byte("Delivered by Concourse")
+	if commentPath != "" {
+		if comment, err = ioutil.ReadFile(filepath.Join(sources, commentPath)); err != nil {
+			fatal("reading comment file", err)
+		}
+	}
+
 	sayf("Scanning repositories: %s\n", strings.Join(repos, ", "))
 
 	tracker.DefaultURL = trackerURL
@@ -63,13 +73,13 @@ func main() {
 	}
 
 	for _, story := range stories {
-		deliverIfDone(client, story, sources, repos)
+		deliverIfDone(client, story, sources, string(comment), repos)
 	}
 
 	outputResponse()
 }
 
-func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources string, repos []string) {
+func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources, comment string, repos []string) {
 	sayf(colorstring.Color("Checking for finished story: [blue]#%d\n"), story.ID)
 
 	for _, repo := range repos {
@@ -82,7 +92,7 @@ func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources st
 
 		if len(outputFixes) > 0 || len(outputFinishes) > 0 {
 			sayf(colorstring.Color("[green]DELIVERING\n"))
-			client.DeliverStoryWithComment(story.ID, "Delivered by Concourse")
+			client.DeliverStoryWithComment(story.ID, comment)
 		} else {
 			sayf(colorstring.Color("  [yellow]SKIPPING\n"))
 		}
