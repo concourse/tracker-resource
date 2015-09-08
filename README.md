@@ -34,4 +34,8 @@ You'll need a seperate resource for each Tracker project.
       - git-repo-path
 ```
 
-The only parameter you need to submit to the resource on a per build basis are the paths to the git repositories which will contain the delivering commits.
+#### Out Parameters
+
+* `repos`: *Required.* Paths to the git repositories which will contain the delivering commits.
+
+* `comment`: *Optional.* A file containing a comment to leave on any delivered stories. If not specified, this comment defaults to "Delivered by Concourse."
