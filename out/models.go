@@ -8,7 +8,8 @@ type OutRequest struct {
 }
 
 type Params struct {
-	Repos []string `json:"repos"`
+	Repos       []string `json:"repos"`
+	CommentPath string   `json:"comment"`
 }
 
 type OutResponse struct {
