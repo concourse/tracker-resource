@@ -20,4 +20,4 @@ CGO_ENABLED=1 ginkgo -race -r -p "$@"
 ./scripts/build
 
 cd ..
-mv tracker-resource $ROOT/build-root
+cp -a tracker-resource $ROOT/build-root
