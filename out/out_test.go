@@ -56,7 +56,7 @@ var _ = Describe("Out", func() {
 		BeforeEach(func() {
 			actualTrackerToken = os.Getenv("TRACKER_TOKEN")
 			if actualTrackerToken == "" {
-				Fail("TRACKER_TOKEN must be provided.")
+				Skip("TRACKER_TOKEN must be provided.")
 			}
 
 			storyId = createActualStory(projectId, actualTrackerToken)
