@@ -22,37 +22,65 @@ import (
 )
 
 type TestRunner struct {
-	suite testsuite.TestSuite
+	Suite testsuite.TestSuite
+
+	compiled              bool
+	compilationTargetPath string
 
 	numCPU         int
 	parallelStream bool
 	race           bool
 	cover          bool
+	coverPkg       string
 	tags           string
 	additionalArgs []string
 }
 
-func New(suite testsuite.TestSuite, numCPU int, parallelStream bool, race bool, cover bool, tags string, additionalArgs []string) *TestRunner {
-	return &TestRunner{
-		suite:          suite,
+func New(suite testsuite.TestSuite, numCPU int, parallelStream bool, race bool, cover bool, coverPkg string, tags string, additionalArgs []string) *TestRunner {
+	runner := &TestRunner{
+		Suite:          suite,
 		numCPU:         numCPU,
 		parallelStream: parallelStream,
 		race:           race,
 		cover:          cover,
+		coverPkg:       coverPkg,
 		tags:           tags,
 		additionalArgs: additionalArgs,
 	}
+
+	if !suite.Precompiled {
+		dir, err := ioutil.TempDir("", "ginkgo")
+		if err != nil {
+			panic(fmt.Sprintf("coulnd't create temporary directory... might be time to rm -rf:\n%s", err.Error()))
+		}
+		runner.compilationTargetPath = filepath.Join(dir, suite.PackageName+".test")
+	}
+
+	return runner
 }
 
 func (t *TestRunner) Compile() error {
-	os.Remove(t.compiledArtifact())
+	return t.CompileTo(t.compilationTargetPath)
+}
 
-	args := []string{"test", "-c", "-i"}
+func (t *TestRunner) CompileTo(path string) error {
+	if t.compiled {
+		return nil
+	}
+
+	if t.Suite.Precompiled {
+		return nil
+	}
+
+	args := []string{"test", "-c", "-i", "-o", path}
 	if t.race {
 		args = append(args, "-race")
 	}
-	if t.cover {
+	if t.cover || t.coverPkg != "" {
 		args = append(args, "-cover", "-covermode=atomic")
+	}
+	if t.coverPkg != "" {
+		args = append(args, fmt.Sprintf("-coverpkg=%s", t.coverPkg))
 	}
 	if t.tags != "" {
 		args = append(args, fmt.Sprintf("-tags=%s", t.tags))
@@ -60,19 +88,40 @@ func (t *TestRunner) Compile() error {
 
 	cmd := exec.Command("go", args...)
 
-	cmd.Dir = t.suite.Path
+	cmd.Dir = t.Suite.Path
 
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
-		fixedOutput := fixCompilationOutput(string(output), t.suite.Path)
+		fixedOutput := fixCompilationOutput(string(output), t.Suite.Path)
 		if len(output) > 0 {
-			return fmt.Errorf("Failed to compile %s:\n\n%s", t.suite.PackageName, fixedOutput)
+			return fmt.Errorf("Failed to compile %s:\n\n%s", t.Suite.PackageName, fixedOutput)
 		}
-		return fmt.Errorf("")
+		return fmt.Errorf("Failed to compile %s", t.Suite.PackageName)
 	}
 
+	if fileExists(path) == false {
+		compiledFile := filepath.Join(t.Suite.Path, t.Suite. PackageName+".test")
+		if fileExists(compiledFile) {
+			// seems like we are on an old go version that does not support the -o flag on go test
+			// move the compiled test file to the desired location by hand
+			err = os.Rename(compiledFile, path)
+			if err != nil {
+				return fmt.Errorf("Failed to move compiled file: %s", err)
+			}
+		} else {
+			return fmt.Errorf("Failed to compile %s: output file %q could not be found", t.Suite.PackageName, path)
+		}
+	}
+
+	t.compiled = true
+
 	return nil
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil || os.IsNotExist(err) == false
 }
 
 /*
@@ -105,7 +154,7 @@ func fixCompilationOutput(output string, relToPath string) string {
 }
 
 func (t *TestRunner) Run() RunResult {
-	if t.suite.IsGinkgo {
+	if t.Suite.IsGinkgo {
 		if t.numCPU > 1 {
 			if t.parallelStream {
 				return t.runAndStreamParallelGinkgoSuite()
@@ -120,13 +169,11 @@ func (t *TestRunner) Run() RunResult {
 	}
 }
 
-func (t *TestRunner) CleanUp(signal ...os.Signal) {
-	os.Remove(t.compiledArtifact())
-}
-
-func (t *TestRunner) compiledArtifact() string {
-	compiledArtifact, _ := filepath.Abs(filepath.Join(t.suite.Path, fmt.Sprintf("%s.test", t.suite.PackageName)))
-	return compiledArtifact
+func (t *TestRunner) CleanUp() {
+	if t.Suite.Precompiled {
+		return
+	}
+	os.RemoveAll(filepath.Dir(t.compilationTargetPath))
 }
 
 func (t *TestRunner) runSerialGinkgoSuite() RunResult {
@@ -183,7 +230,7 @@ func (t *TestRunner) runAndStreamParallelGinkgoSuite() RunResult {
 
 	os.Stdout.Sync()
 
-	if t.cover {
+	if t.cover || t.coverPkg != "" {
 		t.combineCoverprofiles()
 	}
 
@@ -244,20 +291,15 @@ func (t *TestRunner) runParallelGinkgoSuite() RunResult {
 		fmt.Println("")
 	case <-time.After(time.Second):
 		//the aggregator never got back to us!  something must have gone wrong
-		fmt.Println("")
-		fmt.Println("")
-		fmt.Println("   ----------------------------------------------------------- ")
-		fmt.Println("  |                                                           |")
-		fmt.Println("  |  Ginkgo timed out waiting for all parallel nodes to end!  |")
-		fmt.Println("  |  Here is some salvaged output:                            |")
-		fmt.Println("  |                                                           |")
-		fmt.Println("   ----------------------------------------------------------- ")
-		fmt.Println("")
-		fmt.Println("")
+		fmt.Println(`
+	 -------------------------------------------------------------------
+	|                                                                   |
+	|  Ginkgo timed out waiting for all parallel nodes to report back!  |
+	|                                                                   |
+	 -------------------------------------------------------------------
+`)
 
 		os.Stdout.Sync()
-
-		time.Sleep(time.Second)
 
 		for _, writer := range writers {
 			writer.Close()
@@ -270,7 +312,7 @@ func (t *TestRunner) runParallelGinkgoSuite() RunResult {
 		os.Stdout.Sync()
 	}
 
-	if t.cover {
+	if t.cover || t.coverPkg != "" {
 		t.combineCoverprofiles()
 	}
 
@@ -278,9 +320,9 @@ func (t *TestRunner) runParallelGinkgoSuite() RunResult {
 }
 
 func (t *TestRunner) cmd(ginkgoArgs []string, stream io.Writer, node int) *exec.Cmd {
-	args := []string{"-test.timeout=24h"}
-	if t.cover {
-		coverprofile := "--test.coverprofile=" + t.suite.PackageName + ".coverprofile"
+	args := []string{"--test.timeout=24h"}
+	if t.cover || t.coverPkg != "" {
+		coverprofile := "--test.coverprofile=" + t.Suite.PackageName + ".coverprofile"
 		if t.numCPU > 1 {
 			coverprofile = fmt.Sprintf("%s.%d", coverprofile, node)
 		}
@@ -290,9 +332,14 @@ func (t *TestRunner) cmd(ginkgoArgs []string, stream io.Writer, node int) *exec.
 	args = append(args, ginkgoArgs...)
 	args = append(args, t.additionalArgs...)
 
-	cmd := exec.Command(t.compiledArtifact(), args...)
+	path := t.compilationTargetPath
+	if t.Suite.Precompiled {
+		path, _ = filepath.Abs(filepath.Join(t.Suite.Path, fmt.Sprintf("%s.test", t.Suite.PackageName)))
+	}
 
-	cmd.Dir = t.suite.Path
+	cmd := exec.Command(path, args...)
+
+	cmd.Dir = t.Suite.Path
 	cmd.Stderr = stream
 	cmd.Stdout = stream
 
@@ -325,8 +372,8 @@ func (t *TestRunner) run(cmd *exec.Cmd, completions chan RunResult) RunResult {
 func (t *TestRunner) combineCoverprofiles() {
 	profiles := []string{}
 	for cpu := 1; cpu <= t.numCPU; cpu++ {
-		coverFile := fmt.Sprintf("%s.coverprofile.%d", t.suite.PackageName, cpu)
-		coverFile = filepath.Join(t.suite.Path, coverFile)
+		coverFile := fmt.Sprintf("%s.coverprofile.%d", t.Suite.PackageName, cpu)
+		coverFile = filepath.Join(t.Suite.Path, coverFile)
 		coverProfile, err := ioutil.ReadFile(coverFile)
 		os.Remove(coverFile)
 
@@ -340,8 +387,8 @@ func (t *TestRunner) combineCoverprofiles() {
 	}
 
 	lines := map[string]int{}
-
-	for _, coverProfile := range profiles {
+	lineOrder := []string{}
+	for i, coverProfile := range profiles {
 		for _, line := range strings.Split(string(coverProfile), "\n")[1:] {
 			if len(line) == 0 {
 				continue
@@ -350,13 +397,16 @@ func (t *TestRunner) combineCoverprofiles() {
 			count, _ := strconv.Atoi(components[len(components)-1])
 			prefix := strings.Join(components[0:len(components)-1], " ")
 			lines[prefix] += count
+			if i == 0 {
+				lineOrder = append(lineOrder, prefix)
+			}
 		}
 	}
 
 	output := []string{"mode: atomic"}
-	for line, count := range lines {
-		output = append(output, fmt.Sprintf("%s %d", line, count))
+	for _, line := range lineOrder {
+		output = append(output, fmt.Sprintf("%s %d", line, lines[line]))
 	}
 	finalOutput := strings.Join(output, "\n")
-	ioutil.WriteFile(filepath.Join(t.suite.Path, fmt.Sprintf("%s.coverprofile", t.suite.PackageName)), []byte(finalOutput), 0666)
+	ioutil.WriteFile(filepath.Join(t.Suite.Path, fmt.Sprintf("%s.coverprofile", t.Suite.PackageName)), []byte(finalOutput), 0666)
 }

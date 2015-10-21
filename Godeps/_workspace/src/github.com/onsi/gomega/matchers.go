@@ -49,6 +49,21 @@ func HaveOccurred() types.GomegaMatcher {
 	return &matchers.HaveOccurredMatcher{}
 }
 
+//Succeed passes if actual is a nil error
+//Succeed is intended to be used with functions that return a single error value. Instead of
+//    err := SomethingThatMightFail()
+//    Ω(err).ShouldNot(HaveOccurred())
+//
+//You can write:
+//    Ω(SomethingThatMightFail()).Should(Succeed())
+//
+//It is a mistake to use Succeed with a function that has multiple return values.  Gomega's Ω and Expect
+//functions automatically trigger failure if any return values after the first return value are non-zero/non-nil.
+//This means that Ω(MultiReturnFunc()).ShouldNot(Succeed()) can never pass.
+func Succeed() types.GomegaMatcher {
+	return &matchers.SucceedMatcher{}
+}
+
 //MatchError succeeds if actual is a non-nil error that matches the passed in string/error.
 //
 //These are valid use-cases:
@@ -77,14 +92,14 @@ func BeClosed() types.GomegaMatcher {
 	return &matchers.BeClosedMatcher{}
 }
 
-//Receive succeeds if there is a message to be received on actual.
+//Receive succeeds if there is a value to be received on actual.
 //Actual must be a channel (and cannot be a send-only channel) -- anything else is an error.
 //
 //Receive returns immediately and never blocks:
 //
 //- If there is nothing on the channel `c` then Ω(c).Should(Receive()) will fail and Ω(c).ShouldNot(Receive()) will pass.
 //
-//- If the channel `c` is closed then *both* Ω(c).Should(Receive()) and Ω(c).ShouldNot(Receive()) will error.
+//- If the channel `c` is closed then Ω(c).Should(Receive()) will fail and Ω(c).ShouldNot(Receive()) will pass.
 //
 //- If there is something on the channel `c` ready to be read, then Ω(c).Should(Receive()) will pass and Ω(c).ShouldNot(Receive()) will fail.
 //
@@ -123,6 +138,24 @@ func Receive(args ...interface{}) types.GomegaMatcher {
 	}
 }
 
+//BeSent succeeds if a value can be sent to actual.
+//Actual must be a channel (and cannot be a receive-only channel) that can sent the type of the value passed into BeSent -- anything else is an error.
+//In addition, actual must not be closed.
+//
+//BeSent never blocks:
+//
+//- If the channel `c` is not ready to receive then Ω(c).Should(BeSent("foo")) will fail immediately
+//- If the channel `c` is eventually ready to receive then Eventually(c).Should(BeSent("foo")) will succeed.. presuming the channel becomes ready to receive  before Eventually's timeout
+//- If the channel `c` is closed then Ω(c).Should(BeSent("foo")) and Ω(c).ShouldNot(BeSent("foo")) will both fail immediately
+//
+//Of course, the value is actually sent to the channel.  The point of `BeSent` is less to make an assertion about the availability of the channel (which is typically an implementation detail that your test should not be concerned with).
+//Rather, the point of `BeSent` is to make it possible to easily and expressively write tests that can timeout on blocked channel sends.
+func BeSent(arg interface{}) types.GomegaMatcher {
+	return &matchers.BeSentMatcher{
+		Arg: arg,
+	}
+}
+
 //MatchRegexp succeeds if actual is a string or stringer that matches the
 //passed-in regexp.  Optional arguments can be provided to construct a regexp
 //via fmt.Sprintf().
@@ -139,6 +172,26 @@ func MatchRegexp(regexp string, args ...interface{}) types.GomegaMatcher {
 func ContainSubstring(substr string, args ...interface{}) types.GomegaMatcher {
 	return &matchers.ContainSubstringMatcher{
 		Substr: substr,
+		Args:   args,
+	}
+}
+
+//HavePrefix succeeds if actual is a string or stringer that contains the
+//passed-in string as a prefix.  Optional arguments can be provided to construct
+//via fmt.Sprintf().
+func HavePrefix(prefix string, args ...interface{}) types.GomegaMatcher {
+	return &matchers.HavePrefixMatcher{
+		Prefix: prefix,
+		Args:   args,
+	}
+}
+
+//HaveSuffix succeeds if actual is a string or stringer that contains the
+//passed-in string as a suffix.  Optional arguments can be provided to construct
+//via fmt.Sprintf().
+func HaveSuffix(suffix string, args ...interface{}) types.GomegaMatcher {
+	return &matchers.HaveSuffixMatcher{
+		Suffix: suffix,
 		Args:   args,
 	}
 }
@@ -197,16 +250,6 @@ func ContainElement(element interface{}) types.GomegaMatcher {
 //    Ω([]string{"Foo", "FooBar"}).Should(ConsistOf([]string{"FooBar", "Foo"}))
 //
 //Note that Go's type system does not allow you to write this as ConsistOf([]string{"FooBar", "Foo"}...) as []string and []interface{} are different types - hence the need for this special rule.
-//When using `ConsistOf` with custom matchers you should be wary of cases where a matcher is under-specified and may match *more* than the element it is intended to match.  Consider this example:
-//
-//     Ω([]string{"Foo", "FooBar"}).ShouldConsistOf(ContainSubstring("Foo"), ContainSubstring("Bar"))
-//
-// will pass, but:
-//
-//     Ω([]string{"FooBar", "Foo"}).ShouldConsistOf(ContainSubstring("Foo"), ContainSubstring("Bar"))
-//
-// will fail as the first `ContainSubstring` matcher will greedily match the `"FooBar"` leaving nothing for the second `ContainSubstring` matcher to match against.
-
 func ConsistOf(elements ...interface{}) types.GomegaMatcher {
 	return &matchers.ConsistOfMatcher{
 		Elements: elements,
@@ -281,4 +324,70 @@ func BeAssignableToTypeOf(expected interface{}) types.GomegaMatcher {
 //Actual must be a function that takes no arguments and returns no results.
 func Panic() types.GomegaMatcher {
 	return &matchers.PanicMatcher{}
+}
+
+//BeAnExistingFile succeeds if a file exists.
+//Actual must be a string representing the abs path to the file being checked.
+func BeAnExistingFile() types.GomegaMatcher {
+	return &matchers.BeAnExistingFileMatcher{}
+}
+
+//BeARegularFile succeeds iff a file exists and is a regular file.
+//Actual must be a string representing the abs path to the file being checked.
+func BeARegularFile() types.GomegaMatcher {
+	return &matchers.BeARegularFileMatcher{}
+}
+
+//BeADirectory succeeds iff a file exists and is a directory.
+//Actual must be a string representing the abs path to the file being checked.
+func BeADirectory() types.GomegaMatcher {
+	return &matchers.BeADirectoryMatcher{}
+}
+
+//And succeeds only if all of the given matchers succeed.
+//The matchers are tried in order, and will fail-fast if one doesn't succeed.
+//  Expect("hi").To(And(HaveLen(2), Equal("hi"))
+//
+//And(), Or(), Not() and WithTransform() allow matchers to be composed into complex expressions.
+func And(ms ...types.GomegaMatcher) types.GomegaMatcher {
+	return &matchers.AndMatcher{Matchers: ms}
+}
+
+//SatisfyAll is an alias for And().
+//  Ω("hi").Should(SatisfyAll(HaveLen(2), Equal("hi")))
+func SatisfyAll(matchers ...types.GomegaMatcher) types.GomegaMatcher {
+	return And(matchers...)
+}
+
+//Or succeeds if any of the given matchers succeed.
+//The matchers are tried in order and will return immediately upon the first successful match.
+//  Expect("hi").To(Or(HaveLen(3), HaveLen(2))
+//
+//And(), Or(), Not() and WithTransform() allow matchers to be composed into complex expressions.
+func Or(ms ...types.GomegaMatcher) types.GomegaMatcher {
+	return &matchers.OrMatcher{Matchers: ms}
+}
+
+//SatisfyAny is an alias for Or().
+//  Expect("hi").SatisfyAny(Or(HaveLen(3), HaveLen(2))
+func SatisfyAny(matchers ...types.GomegaMatcher) types.GomegaMatcher {
+	return Or(matchers...)
+}
+
+//Not negates the given matcher; it succeeds if the given matcher fails.
+//  Expect(1).To(Not(Equal(2))
+//
+//And(), Or(), Not() and WithTransform() allow matchers to be composed into complex expressions.
+func Not(matcher types.GomegaMatcher) types.GomegaMatcher {
+	return &matchers.NotMatcher{Matcher: matcher}
+}
+
+//WithTransform applies the `transform` to the actual value and matches it against `matcher`.
+//The given transform must be a function of one parameter that returns one value.
+//  var plus1 = func(i int) int { return i + 1 }
+//  Expect(1).To(WithTransform(plus1, Equal(2))
+//
+//And(), Or(), Not() and WithTransform() allow matchers to be composed into complex expressions.
+func WithTransform(transform interface{}, matcher types.GomegaMatcher) types.GomegaMatcher {
+	return matchers.NewWithTransformMatcher(transform, matcher)
 }

@@ -7,20 +7,21 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/mitchellh/colorstring",
-			"Rev": "9797cb57e314a5a2c4d735ff060d5c6dcba57749"
+			"Rev": "8631ce90f28644f54aeedcb3e389a85174e067d1"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
-			"Comment": "v1.0.0-23-g939c01c",
-			"Rev": "39d2c24f8a92c88f7e7f4d8ec6c80d3cc8f5ac65"
+			"Comment": "v1.2.0-14-g1b59c57",
+			"Rev": "1b59c57df76ede42c08590546916e6a18685857d"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
+			"Comment": "v1.0-71-g2152b45",
 			"Rev": "2152b45fa28a361beba9aab0885972323a444e28"
 		},
 		{
 			"ImportPath": "github.com/xoebus/go-tracker",
-			"Rev": "56ad65ab052bda92debaaf42471b64f756a23859"
+			"Rev": "c5b8783381a5a9763aa2fcf438ccc82da9664e9b"
 		}
 	]
 }
