@@ -22,6 +22,10 @@
 		{
 			"ImportPath": "github.com/xoebus/go-tracker",
 			"Rev": "c5b8783381a5a9763aa2fcf438ccc82da9664e9b"
+		},
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "9ebc6c4ed925b1323a0b11cea09e527cdc4e557c"
 		}
 	]
 }
