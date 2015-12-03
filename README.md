@@ -4,6 +4,10 @@ An output only resource that will deliver finished [Pivotal Tracker][tracker] st
 
 [tracker]: https://www.pivotaltracker.com
 
+## Usage
+
+When you use the [Pivotal Tracker syntax for finishing a story or fixing a bug](https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks) this resource will detect it in your commit history and deliver the appropriate stories.
+
 ## Configuration
 
 ### Resource
