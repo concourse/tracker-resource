@@ -87,8 +87,8 @@ func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources, c
 
 		sayf(colorstring.Color("  [white][bold]%s[default]...%s"), repo, strings.Repeat(" ", 80-2-3-10-len(repo)))
 
-		outputFixes := checkGitLog("fixes", story, dir)
-		outputFinishes := checkGitLog("finishes", story, dir)
+		outputFixes := checkGitLog([]string{"fixes", "fixed", "fix"}, story, dir)
+		outputFinishes := checkGitLog([]string{"finishes", "finished", "finish"}, story, dir)
 
 		if len(outputFixes) > 0 || len(outputFinishes) > 0 {
 			sayf(colorstring.Color("[green]DELIVERING\n"))
@@ -101,8 +101,9 @@ func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources, c
 	sayf("\n")
 }
 
-func checkGitLog(verb string, story tracker.Story, dir string) []byte {
-	command := exec.Command("git", "log", "-i", "--grep", fmt.Sprintf("%s #%d", verb, story.ID))
+func checkGitLog(verbs []string, story tracker.Story, dir string) []byte {
+	verbsRegexp := fmt.Sprintf("(%s)", strings.Join(verbs, "|"))
+	command := exec.Command("git", "log", "-i", "--extended-regexp", "--grep", fmt.Sprintf("%s #%d", verbsRegexp, story.ID))
 	command.Dir = dir
 
 	output, err := command.CombinedOutput()
@@ -112,7 +113,17 @@ func checkGitLog(verb string, story tracker.Story, dir string) []byte {
 		return nil
 	}
 
-	return output
+	command = exec.Command("git", "log", "-i", "--extended-regexp", "--grep", fmt.Sprintf("#%d %s", story.ID, verbsRegexp))
+	command.Dir = dir
+
+	output2, err := command.CombinedOutput()
+	if err != nil {
+		sayf("git logging failed for story: %d: %s\n", story.ID, err)
+
+		return nil
+	}
+
+	return append(output, output2...)
 }
 
 func outputResponse() {
