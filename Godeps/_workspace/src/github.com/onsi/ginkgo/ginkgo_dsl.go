@@ -20,16 +20,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/onsi/ginkgo/config"
-	"github.com/onsi/ginkgo/internal/codelocation"
-	"github.com/onsi/ginkgo/internal/failer"
-	"github.com/onsi/ginkgo/internal/remote"
-	"github.com/onsi/ginkgo/internal/suite"
-	"github.com/onsi/ginkgo/internal/testingtproxy"
-	"github.com/onsi/ginkgo/internal/writer"
-	"github.com/onsi/ginkgo/reporters"
-	"github.com/onsi/ginkgo/reporters/stenographer"
-	"github.com/onsi/ginkgo/types"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo/config"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo/internal/codelocation"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo/internal/failer"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo/internal/remote"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo/internal/suite"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo/internal/testingtproxy"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo/internal/writer"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo/reporters"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo/reporters/stenographer"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo/types"
 )
 
 const GINKGO_VERSION = config.VERSION

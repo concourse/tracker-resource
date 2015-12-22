@@ -18,10 +18,10 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/onsi/gomega/internal/assertion"
-	"github.com/onsi/gomega/internal/asyncassertion"
-	"github.com/onsi/gomega/internal/testingtsupport"
-	"github.com/onsi/gomega/types"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/gomega/internal/assertion"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/gomega/internal/asyncassertion"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/gomega/internal/testingtsupport"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/gomega/types"
 )
 
 const GOMEGA_VERSION = "1.0"

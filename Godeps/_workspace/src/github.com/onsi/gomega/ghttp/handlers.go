@@ -9,9 +9,9 @@ import (
 	"net/url"
 	"reflect"
 
-	"github.com/golang/protobuf/proto"
-	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/types"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/golang/protobuf/proto"
+	. "github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/gomega"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/gomega/types"
 )
 
 //CombineHandler takes variadic list of handlers and produces one handler

@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"flag"
-	"github.com/onsi/ginkgo/ginkgo/nodot"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo/ginkgo/nodot"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -63,6 +63,8 @@ func findSuiteFile() (string, os.FileMode) {
 		if err != nil {
 			complainAndQuit("Could not find suite file for nodot: " + err.Error())
 		}
+		defer f.Close()
+
 		if re.MatchReader(bufio.NewReader(f)) {
 			return path, file.Mode()
 		}

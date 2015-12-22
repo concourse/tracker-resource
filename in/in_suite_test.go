@@ -1,8 +1,8 @@
 package in_test
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	. "github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/ginkgo"
+	. "github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/gomega"
 
 	"testing"
 )

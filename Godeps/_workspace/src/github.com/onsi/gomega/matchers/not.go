@@ -1,8 +1,8 @@
 package matchers
 
 import (
-	"github.com/onsi/gomega/internal/oraclematcher"
-	"github.com/onsi/gomega/types"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/gomega/internal/oraclematcher"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/gomega/types"
 )
 
 type NotMatcher struct {

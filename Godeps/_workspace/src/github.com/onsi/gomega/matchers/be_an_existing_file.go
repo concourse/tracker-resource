@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/onsi/gomega/format"
+	"github.com/concourse/tracker-resource/Godeps/_workspace/src/github.com/onsi/gomega/format"
 )
 
 type BeAnExistingFileMatcher struct {
