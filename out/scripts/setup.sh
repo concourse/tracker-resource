@@ -33,6 +33,9 @@ pushd $DIR/git
 	touch file.txt
 	git add file.txt
 	git commit -m "add file [Finishes #123456]"
+	git commit -m "add file [#223456 Finishes]" --allow-empty
+	git commit -m "add file [Finished #323456]" --allow-empty
+	git commit -m "add file [Finish #423456]" --allow-empty
 popd
 
 # git2: git harder directory
@@ -48,6 +51,9 @@ pushd $DIR/middle/git2
 	git commit -m "fix bug
 
 	[fixes #123457]"
+	git commit -m "fix bug [#223457 fixes]" --allow-empty
+	git commit -m "fix bug [fixed #323457]" --allow-empty
+	git commit -m "fix bug [fix #423457]" --allow-empty
 popd
 
 if [ ! -z ${ACTUAL_STORY_ID} ]; then
