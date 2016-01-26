@@ -117,105 +117,111 @@ var _ = Describe("Out", func() {
 			}
 			response = out.OutResponse{}
 
-			comment := "Delivered by Concourse"
-
-			server.AppendHandlers(
-				listStoriesHandler(trackerToken),
-				deliverStoryHandler(trackerToken, projectId, 123456),
-				deliverStoryCommentHandler(trackerToken, projectId, 123456, comment),
-				deliverStoryHandler(trackerToken, projectId, 123457),
-				deliverStoryCommentHandler(trackerToken, projectId, 123457, comment),
-				deliverStoryHandler(trackerToken, projectId, 223456),
-				deliverStoryCommentHandler(trackerToken, projectId, 223456, comment),
-				deliverStoryHandler(trackerToken, projectId, 323456),
-				deliverStoryCommentHandler(trackerToken, projectId, 323456, comment),
-				deliverStoryHandler(trackerToken, projectId, 423456),
-				deliverStoryCommentHandler(trackerToken, projectId, 423456, comment),
-				deliverStoryHandler(trackerToken, projectId, 223457),
-				deliverStoryCommentHandler(trackerToken, projectId, 223457, comment),
-				deliverStoryHandler(trackerToken, projectId, 323457),
-				deliverStoryCommentHandler(trackerToken, projectId, 323457, comment),
-				deliverStoryHandler(trackerToken, projectId, 423457),
-				deliverStoryCommentHandler(trackerToken, projectId, 423457, comment),
-			)
 		})
 
 		AfterEach(func() {
 			server.Close()
 		})
 
-		It("does not output credentials", func() {
-			session := runCommand(outCmd, request)
+		Context("without a comment file specified", func() {
+			BeforeEach(func() {
+				server.AppendHandlers(
+					listStoriesHandler(trackerToken),
+					deliverStoryHandler(trackerToken, projectId, 123456),
+					deliverStoryHandler(trackerToken, projectId, 123457),
+					deliverStoryHandler(trackerToken, projectId, 223456),
+					deliverStoryHandler(trackerToken, projectId, 323456),
+					deliverStoryHandler(trackerToken, projectId, 423456),
+					deliverStoryHandler(trackerToken, projectId, 223457),
+					deliverStoryHandler(trackerToken, projectId, 323457),
+					deliverStoryHandler(trackerToken, projectId, 423457),
+				)
+			})
 
-			Ω(session.Err).ShouldNot(Say(trackerToken))
-		})
+			It("does not output credentials", func() {
+				session := runCommand(outCmd, request)
 
-		It("finds finished stories that are mentioned in recent git commits", func() {
-			session := runCommand(outCmd, request)
+				Ω(session.Err).ShouldNot(Say(trackerToken))
+			})
 
-			Ω(session.Err).Should(Say("Checking for finished story: .*#565"))
-			Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
-			Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+			It("finds finished stories that are mentioned in recent git commits", func() {
+				session := runCommand(outCmd, request)
 
-			Ω(session.Err).Should(Say("Checking for finished story: .*#123456"))
-			Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
-			Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+				Ω(session.Err).Should(Say("Checking for finished story: .*#565"))
+				Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
+				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
 
-			Ω(session.Err).Should(Say("Checking for finished story: .*#123457"))
-			Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
-			Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
+				Ω(session.Err).Should(Say("Checking for finished story: .*#123456"))
+				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
+				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
 
-			Ω(session.Err).Should(Say("Checking for finished story: .*#223456"))
-			Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
-			Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+				Ω(session.Err).Should(Say("Checking for finished story: .*#123457"))
+				Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
+				Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
 
-			Ω(session.Err).Should(Say("Checking for finished story: .*#323456"))
-			Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
-			Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+				Ω(session.Err).Should(Say("Checking for finished story: .*#223456"))
+				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
+				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
 
-			Ω(session.Err).Should(Say("Checking for finished story: .*#423456"))
-			Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
-			Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+				Ω(session.Err).Should(Say("Checking for finished story: .*#323456"))
+				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
+				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
 
-			Ω(session.Err).Should(Say("Checking for finished story: .*#223457"))
-			Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
-			Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
+				Ω(session.Err).Should(Say("Checking for finished story: .*#423456"))
+				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
+				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
 
-			Ω(session.Err).Should(Say("Checking for finished story: .*#323457"))
-			Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
-			Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
+				Ω(session.Err).Should(Say("Checking for finished story: .*#223457"))
+				Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
+				Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
 
-			Ω(session.Err).Should(Say("Checking for finished story: .*#423457"))
-			Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
-			Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
-		})
+				Ω(session.Err).Should(Say("Checking for finished story: .*#323457"))
+				Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
+				Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
 
-		It("outputs the current time", func() {
-			session := runCommand(outCmd, request)
+				Ω(session.Err).Should(Say("Checking for finished story: .*#423457"))
+				Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
+				Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
+			})
 
-			err := json.Unmarshal(session.Out.Contents(), &response)
-			Ω(err).ShouldNot(HaveOccurred())
-			Ω(response.Version.Time).Should(BeTemporally("~", time.Now(), time.Second))
+			It("outputs the current time", func() {
+				session := runCommand(outCmd, request)
+
+				err := json.Unmarshal(session.Out.Contents(), &response)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(response.Version.Time).Should(BeTemporally("~", time.Now(), time.Second))
+			})
 		})
 
 		Context("when a comment file is specified", func() {
-			It("should make a comment with the file's contents", func() {
+			BeforeEach(func() {
 				commentPath := "tracker-resource-comment"
 				request.Params.CommentPath = commentPath
 				err := ioutil.WriteFile(filepath.Join(tmpdir, commentPath), []byte("some custom comment"), os.ModePerm)
 				Ω(err).ShouldNot(HaveOccurred())
 
-				server.SetHandler(2, deliverStoryCommentHandler(trackerToken, projectId, 123456, "some custom comment"))
-				server.SetHandler(4, deliverStoryCommentHandler(trackerToken, projectId, 123457, "some custom comment"))
+				server.AppendHandlers(
+					listStoriesHandler(trackerToken),
+					deliverStoryHandler(trackerToken, projectId, 123456),
+					deliverStoryCommentHandler(trackerToken, projectId, 123456, "some custom comment"),
+					deliverStoryHandler(trackerToken, projectId, 123457),
+					deliverStoryCommentHandler(trackerToken, projectId, 123457, "some custom comment"),
+					deliverStoryHandler(trackerToken, projectId, 223456),
+					deliverStoryCommentHandler(trackerToken, projectId, 223456, "some custom comment"),
+					deliverStoryHandler(trackerToken, projectId, 323456),
+					deliverStoryCommentHandler(trackerToken, projectId, 323456, "some custom comment"),
+					deliverStoryHandler(trackerToken, projectId, 423456),
+					deliverStoryCommentHandler(trackerToken, projectId, 423456, "some custom comment"),
+					deliverStoryHandler(trackerToken, projectId, 223457),
+					deliverStoryCommentHandler(trackerToken, projectId, 223457, "some custom comment"),
+					deliverStoryHandler(trackerToken, projectId, 323457),
+					deliverStoryCommentHandler(trackerToken, projectId, 323457, "some custom comment"),
+					deliverStoryHandler(trackerToken, projectId, 423457),
+					deliverStoryCommentHandler(trackerToken, projectId, 423457, "some custom comment"),
+				)
+			})
 
-				server.SetHandler(6, deliverStoryCommentHandler(trackerToken, projectId, 223456, "some custom comment"))
-				server.SetHandler(8, deliverStoryCommentHandler(trackerToken, projectId, 323456, "some custom comment"))
-				server.SetHandler(10, deliverStoryCommentHandler(trackerToken, projectId, 423456, "some custom comment"))
-
-				server.SetHandler(12, deliverStoryCommentHandler(trackerToken, projectId, 223457, "some custom comment"))
-				server.SetHandler(14, deliverStoryCommentHandler(trackerToken, projectId, 323457, "some custom comment"))
-				server.SetHandler(16, deliverStoryCommentHandler(trackerToken, projectId, 423457, "some custom comment"))
-
+			It("should make a comment with the file's contents", func() {
 				session := runCommand(outCmd, request)
 				Ω(session.Err).Should(Say("Checking for finished story: .*#123456"))
 				Ω(session.Err).Should(Say("Checking for finished story: .*#123457"))

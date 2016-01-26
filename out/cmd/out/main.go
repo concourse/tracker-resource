@@ -52,7 +52,7 @@ func main() {
 	repos := request.Params.Repos
 	commentPath := request.Params.CommentPath
 
-	comment := []byte("Delivered by Concourse")
+	var comment []byte
 	if commentPath != "" {
 		if comment, err = ioutil.ReadFile(filepath.Join(sources, commentPath)); err != nil {
 			fatal("reading comment file", err)
@@ -92,7 +92,11 @@ func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources, c
 
 		if len(outputFixes) > 0 || len(outputFinishes) > 0 {
 			sayf(colorstring.Color("[green]DELIVERING\n"))
-			client.DeliverStoryWithComment(story.ID, comment)
+			if comment == "" {
+				client.DeliverStory(story.ID)
+			} else {
+				client.DeliverStoryWithComment(story.ID, comment)
+			}
 		} else {
 			sayf(colorstring.Color("  [yellow]SKIPPING\n"))
 		}
