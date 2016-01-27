@@ -132,6 +132,7 @@ var _ = Describe("Out", func() {
 					deliverStoryHandler(trackerToken, projectId, 223456),
 					deliverStoryHandler(trackerToken, projectId, 323456),
 					deliverStoryHandler(trackerToken, projectId, 423456),
+					deliverStoryHandler(trackerToken, projectId, 523456),
 					deliverStoryHandler(trackerToken, projectId, 223457),
 					deliverStoryHandler(trackerToken, projectId, 323457),
 					deliverStoryHandler(trackerToken, projectId, 423457),
@@ -168,6 +169,10 @@ var _ = Describe("Out", func() {
 				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
 
 				Ω(session.Err).Should(Say("Checking for finished story: .*#423456"))
+				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
+				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+
+				Ω(session.Err).Should(Say("Checking for finished story: .*#523456"))
 				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
 				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
 
@@ -212,6 +217,8 @@ var _ = Describe("Out", func() {
 					deliverStoryCommentHandler(trackerToken, projectId, 323456, "some custom comment"),
 					deliverStoryHandler(trackerToken, projectId, 423456),
 					deliverStoryCommentHandler(trackerToken, projectId, 423456, "some custom comment"),
+					deliverStoryHandler(trackerToken, projectId, 523456),
+					deliverStoryCommentHandler(trackerToken, projectId, 523456, "some custom comment"),
 					deliverStoryHandler(trackerToken, projectId, 223457),
 					deliverStoryCommentHandler(trackerToken, projectId, 223457, "some custom comment"),
 					deliverStoryHandler(trackerToken, projectId, 323457),

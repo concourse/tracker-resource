@@ -35,7 +35,7 @@ pushd $DIR/git
 	git commit -m "add file [Finishes #123456]"
 	git commit -m "add file [#223456 Finishes]" --allow-empty
 	git commit -m "add file [Finished #323456]" --allow-empty
-	git commit -m "add file [Finish #423456]" --allow-empty
+	git commit -m "add file [Finish #423456, #523456]" --allow-empty
 popd
 
 # git2: git harder directory

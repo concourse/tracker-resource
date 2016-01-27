@@ -107,7 +107,7 @@ func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources, c
 
 func checkGitLog(verbs []string, story tracker.Story, dir string) []byte {
 	verbsRegexp := fmt.Sprintf("(%s)", strings.Join(verbs, "|"))
-	command := exec.Command("git", "log", "-i", "--extended-regexp", "--grep", fmt.Sprintf("%s #%d", verbsRegexp, story.ID))
+	command := exec.Command("git", "log", "-i", "--extended-regexp", "--grep", fmt.Sprintf("%s\\s+(#[0-9]+,\\s+)*#%d", verbsRegexp, story.ID))
 	command.Dir = dir
 
 	output, err := command.CombinedOutput()
@@ -117,7 +117,7 @@ func checkGitLog(verbs []string, story tracker.Story, dir string) []byte {
 		return nil
 	}
 
-	command = exec.Command("git", "log", "-i", "--extended-regexp", "--grep", fmt.Sprintf("#%d %s", story.ID, verbsRegexp))
+	command = exec.Command("git", "log", "-i", "--extended-regexp", "--grep", fmt.Sprintf("#%d(,\\s+#[0-9]+)*\\s+%s", story.ID, verbsRegexp))
 	command.Dir = dir
 
 	output2, err := command.CombinedOutput()
