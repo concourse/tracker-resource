@@ -2,6 +2,7 @@
 
 set -e -x
 
-go build -o built-check check/cmd/check/main.go
-go build -o built-in in/cmd/in/main.go
-go build -o built-out out/cmd/out/main.go
+mkdir -p assets
+go build -o assets/check check/cmd/check/main.go
+go build -o assets/in in/cmd/in/main.go
+go build -o assets/out out/cmd/out/main.go
