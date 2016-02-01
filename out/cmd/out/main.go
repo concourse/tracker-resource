@@ -87,10 +87,11 @@ func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources, c
 
 		sayf(colorstring.Color("  [white][bold]%s[default]...%s"), repo, strings.Repeat(" ", 80-2-3-10-len(repo)))
 
+		outputCompletes := checkGitLog([]string{"completes", "completed", "complete"}, story, dir)
 		outputFixes := checkGitLog([]string{"fixes", "fixed", "fix"}, story, dir)
 		outputFinishes := checkGitLog([]string{"finishes", "finished", "finish"}, story, dir)
 
-		if len(outputFixes) > 0 || len(outputFinishes) > 0 {
+		if len(outputCompletes) > 0 || len(outputFixes) > 0 || len(outputFinishes) > 0 {
 			sayf(colorstring.Color("[green]DELIVERING\n"))
 			if comment == "" {
 				client.DeliverStory(story.ID)
