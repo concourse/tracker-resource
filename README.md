@@ -42,4 +42,4 @@ You'll need a seperate resource for each Tracker project.
 
 * `repos`: *Required.* Paths to the git repositories which will contain the delivering commits.
 
-* `comment`: *Optional.* A file containing a comment to leave on any delivered stories. If not specified, this comment defaults to "Delivered by Concourse."
+* `comment`: *Optional.* A file containing a comment to leave on any delivered stories.
