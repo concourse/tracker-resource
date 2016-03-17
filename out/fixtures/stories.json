@@ -131,14 +131,14 @@
        "id": 523456,
        "created_at": "2006-01-02T15:04:05Z",
        "updated_at": "2006-01-02T15:04:05Z",
-       "estimate": 2,
-       "story_type": "feature",
-       "name": "Bring me the passengers",
-       "description": "ignore the droids",
+       "deadline": "2006-01-02T15:04:05Z",
+       "story_type": "release",
+       "name": "Battlestation fully operational",
+       "description": "Everything is proceeding as I have foreseen.",
        "current_state": "finished",
-       "requested_by_id": 101,
+       "requested_by_id": 100,
        "project_id": 99,
-       "url": "http://localhost/story/show/555",
+       "url": "http://localhost/story/show/552",
        "owner_ids":
        [
        ],
@@ -148,37 +148,17 @@
    },
    {
        "kind": "story",
-       "id": 623456,
+       "id": 789456,
        "created_at": "2006-01-02T15:04:05Z",
        "updated_at": "2006-01-02T15:04:05Z",
-       "estimate": 2,
-       "story_type": "feature",
-       "name": "Bring me the passengers",
-       "description": "ignore the droids",
+       "deadline": "2006-01-02T15:04:05Z",
+       "story_type": "release",
+       "name": "Your focus determines your reality",
+       "description": "Do. Or do not. There is no try.",
        "current_state": "finished",
-       "requested_by_id": 101,
+       "requested_by_id": 100,
        "project_id": 99,
-       "url": "http://localhost/story/show/555",
-       "owner_ids":
-       [
-       ],
-       "labels":
-       [
-       ]
-   },
-   {
-       "kind": "story",
-       "id": 723456,
-       "created_at": "2006-01-02T15:04:05Z",
-       "updated_at": "2006-01-02T15:04:05Z",
-       "estimate": 2,
-       "story_type": "feature",
-       "name": "Bring me the passengers",
-       "description": "ignore the droids",
-       "current_state": "finished",
-       "requested_by_id": 101,
-       "project_id": 99,
-       "url": "http://localhost/story/show/555",
+       "url": "http://localhost/story/show/553",
        "owner_ids":
        [
        ],
