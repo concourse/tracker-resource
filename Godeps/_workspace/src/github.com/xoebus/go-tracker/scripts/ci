@@ -1,9 +1,0 @@
-#!/bin/bash
-
-set -e
-
-# Tests
-ginkgo -r -succinct -cover -race -failOnPending
-
-# Check for common mistakes
-go vet .
