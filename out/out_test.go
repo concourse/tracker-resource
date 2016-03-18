@@ -127,16 +127,44 @@ var _ = Describe("Out", func() {
 			BeforeEach(func() {
 				server.AppendHandlers(
 					listStoriesHandler(trackerToken),
+					storyActivityHandler(trackerToken, projectId, 565),
+
+					storyActivityHandler(trackerToken, projectId, 123456),
 					deliverStoryHandler(trackerToken, projectId, 123456),
+
+					storyActivityHandler(trackerToken, projectId, 123457),
 					deliverStoryHandler(trackerToken, projectId, 123457),
+
+					storyActivityHandler(trackerToken, projectId, 223456),
 					deliverStoryHandler(trackerToken, projectId, 223456),
+
+					storyActivityHandler(trackerToken, projectId, 323456),
 					deliverStoryHandler(trackerToken, projectId, 323456),
+
+					storyActivityHandler(trackerToken, projectId, 423456),
 					deliverStoryHandler(trackerToken, projectId, 423456),
+
+					storyActivityHandler(trackerToken, projectId, 523456),
 					deliverStoryHandler(trackerToken, projectId, 523456),
+
+					storyActivityHandler(trackerToken, projectId, 789456),
 					deliverStoryHandler(trackerToken, projectId, 789456),
+
+					storyActivityHandler(trackerToken, projectId, 223457),
 					deliverStoryHandler(trackerToken, projectId, 223457),
+
+					storyActivityHandler(trackerToken, projectId, 323457),
 					deliverStoryHandler(trackerToken, projectId, 323457),
+
+					storyActivityHandler(trackerToken, projectId, 423457),
 					deliverStoryHandler(trackerToken, projectId, 423457),
+
+					storyActivityHandler(trackerToken, projectId, 444444),
+
+					storyActivityHandler(trackerToken, projectId, 555555),
+					deliverStoryHandler(trackerToken, projectId, 555555),
+
+					storyActivityHandler(trackerToken, projectId, 666666),
 				)
 			})
 
@@ -192,6 +220,18 @@ var _ = Describe("Out", func() {
 				Expect(session.Err).To(Say("Checking for finished story: .*#423457"))
 				Expect(session.Err).To(Say("git.*... .*SKIPPING"))
 				Expect(session.Err).To(Say("middle/git2.*... .*DELIVERING"))
+
+				Expect(session.Err).To(Say("Checking for finished story: .*#444444"))
+				Expect(session.Err).To(Say("git.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*SKIPPING"))
+
+				Expect(session.Err).To(Say("Checking for finished story: .*#555555"))
+				Expect(session.Err).To(Say("git.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*DELIVERING"))
+
+				Expect(session.Err).To(Say("Checking for finished story: .*#666666"))
+				Expect(session.Err).To(Say("git.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*SKIPPING"))
 			})
 
 			// It("outputs the current time", func() {
@@ -212,26 +252,55 @@ var _ = Describe("Out", func() {
 
 				server.AppendHandlers(
 					listStoriesHandler(trackerToken),
+					storyActivityHandler(trackerToken, projectId, 565),
+
+					storyActivityHandler(trackerToken, projectId, 123456),
 					deliverStoryHandler(trackerToken, projectId, 123456),
 					deliverStoryCommentHandler(trackerToken, projectId, 123456, "some custom comment"),
+
+					storyActivityHandler(trackerToken, projectId, 123457),
 					deliverStoryHandler(trackerToken, projectId, 123457),
 					deliverStoryCommentHandler(trackerToken, projectId, 123457, "some custom comment"),
+
+					storyActivityHandler(trackerToken, projectId, 223456),
 					deliverStoryHandler(trackerToken, projectId, 223456),
 					deliverStoryCommentHandler(trackerToken, projectId, 223456, "some custom comment"),
+
+					storyActivityHandler(trackerToken, projectId, 323456),
 					deliverStoryHandler(trackerToken, projectId, 323456),
 					deliverStoryCommentHandler(trackerToken, projectId, 323456, "some custom comment"),
+
+					storyActivityHandler(trackerToken, projectId, 423456),
 					deliverStoryHandler(trackerToken, projectId, 423456),
 					deliverStoryCommentHandler(trackerToken, projectId, 423456, "some custom comment"),
+
+					storyActivityHandler(trackerToken, projectId, 523456),
 					deliverStoryHandler(trackerToken, projectId, 523456),
 					deliverStoryCommentHandler(trackerToken, projectId, 523456, "some custom comment"),
+
+					storyActivityHandler(trackerToken, projectId, 789456),
 					deliverStoryHandler(trackerToken, projectId, 789456),
 					deliverStoryCommentHandler(trackerToken, projectId, 789456, "some custom comment"),
+
+					storyActivityHandler(trackerToken, projectId, 223457),
 					deliverStoryHandler(trackerToken, projectId, 223457),
 					deliverStoryCommentHandler(trackerToken, projectId, 223457, "some custom comment"),
+
+					storyActivityHandler(trackerToken, projectId, 323457),
 					deliverStoryHandler(trackerToken, projectId, 323457),
 					deliverStoryCommentHandler(trackerToken, projectId, 323457, "some custom comment"),
+
+					storyActivityHandler(trackerToken, projectId, 423457),
 					deliverStoryHandler(trackerToken, projectId, 423457),
 					deliverStoryCommentHandler(trackerToken, projectId, 423457, "some custom comment"),
+
+					storyActivityHandler(trackerToken, projectId, 444444),
+
+					storyActivityHandler(trackerToken, projectId, 555555),
+					deliverStoryHandler(trackerToken, projectId, 555555),
+					deliverStoryCommentHandler(trackerToken, projectId, 555555, "some custom comment"),
+
+					storyActivityHandler(trackerToken, projectId, 666666),
 				)
 			})
 
@@ -250,6 +319,20 @@ var _ = Describe("Out", func() {
 
 				session := runCommandExpectingStatus(outCmd, request, 1)
 				Expect(session.Err).To(Say("error reading comment file: open"))
+			})
+		})
+
+		Context("when the activity endpoint returns an error", func() {
+			BeforeEach(func() {
+				server.AppendHandlers(
+					listStoriesHandler(trackerToken),
+					ghttp.RespondWith(http.StatusInternalServerError, nil),
+				)
+			})
+
+			It("returns a fatal error", func() {
+				session := runCommandExpectingStatus(outCmd, request, 1)
+				Expect(session.Err).To(Say("error fetching activity for story #565:"))
 			})
 		})
 	})
@@ -278,6 +361,51 @@ func listStoriesHandler(trackerToken string) http.HandlerFunc {
 		ghttp.VerifyRequest("GET", "/services/v5/projects/1234/stories"),
 		ghttp.VerifyHeaderKV("X-TrackerToken", trackerToken),
 		ghttp.RespondWith(http.StatusOK, Fixture("stories.json")),
+	)
+}
+
+func storyActivityHandler(token string, projectId string, storyId int) http.HandlerFunc {
+	body := "[]"
+	switch storyId {
+	case 444444:
+		body = `[
+		{
+			"kind": "story_move_activity"
+		},
+		{
+			"kind": "story_update_activity",
+			"highlight": "rejected",
+			"occurred_at": "2096-03-15T00:11:16Z"
+		}]`
+	case 555555:
+		body = `[
+		{
+			"kind": "story_move_activity"
+		},
+		{
+			"kind": "story_update_activity",
+			"highlight": "rejected",
+			"occurred_at": "1016-03-15T00:11:16Z"
+		}]`
+	case 666666:
+		body = `[
+		{
+			"kind": "story_update_activity",
+			"highlight": "rejected",
+			"occurred_at": "2096-03-15T00:11:16Z"
+		},
+		{
+			"kind": "story_update_activity",
+			"highlight": "rejected",
+			"occurred_at": "1016-03-15T00:11:16Z"
+		}]`
+	}
+	return ghttp.CombineHandlers(
+		ghttp.VerifyRequest(
+			"GET",
+			fmt.Sprintf("/services/v5/projects/%s/stories/%d/activity", projectId, storyId),
+		),
+		ghttp.RespondWith(http.StatusOK, body),
 	)
 }
 

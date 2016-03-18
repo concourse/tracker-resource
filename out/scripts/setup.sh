@@ -57,6 +57,9 @@ pushd $DIR/middle/git2
 	git commit -m "fix bug [#223457 fixes]" --allow-empty
 	git commit -m "fix bug [fixed #323457]" --allow-empty
 	git commit -m "fix bug [fix #423457]" --allow-empty
+	git commit -m "make bad change that gets rejected later [Complete #444444]" --allow-empty
+	git commit -m "fix previously rejected story [Complete #555555]" --allow-empty
+	git commit -m "fix previously rejected story badly so it gets rejected again [Complete #666666]" --allow-empty
 popd
 
 if [ ! -z ${ACTUAL_STORY_ID} ]; then

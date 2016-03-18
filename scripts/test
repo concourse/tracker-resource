@@ -6,7 +6,7 @@ not_installed() {
   ! command -v $1 > /dev/null 2>&1
 }
 
-tracker_resource_dir=$(realpath $(dirname $(dirname $0)))
+tracker_resource_dir=$(cd $(dirname $0)/.. && pwd)
 
 if not_installed ginkgo; then
   echo "# ginkgo is not installed! run the following command:"
@@ -15,4 +15,4 @@ if not_installed ginkgo; then
 fi
 
 cd $tracker_resource_dir
-ginkgo -r -p
+ginkgo -r -p -skipPackage=vendor

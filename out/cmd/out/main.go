@@ -81,14 +81,19 @@ func main() {
 func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources, comment string, repos []string) {
 	sayf(colorstring.Color("Checking for finished story: [blue]#%d\n"), story.ID)
 
+	storyResetTime, err := getStoryResetTime(client, story)
+	if err != nil {
+		fatal(fmt.Sprintf("fetching activity for story #%d", story.ID), err)
+	}
+
 	for _, repo := range repos {
 		dir := filepath.Join(sources, repo)
 
 		sayf(colorstring.Color("  [white][bold]%s[default]...%s"), repo, strings.Repeat(" ", 80-2-3-10-len(repo)))
 
-		outputCompletes := checkGitLog([]string{"completes", "completed", "complete"}, story, dir)
-		outputFixes := checkGitLog([]string{"fixes", "fixed", "fix"}, story, dir)
-		outputFinishes := checkGitLog([]string{"finishes", "finished", "finish"}, story, dir)
+		outputCompletes := checkGitLog([]string{"completes", "completed", "complete"}, story, dir, storyResetTime)
+		outputFixes := checkGitLog([]string{"fixes", "fixed", "fix"}, story, dir, storyResetTime)
+		outputFinishes := checkGitLog([]string{"finishes", "finished", "finish"}, story, dir, storyResetTime)
 
 		if len(outputCompletes) > 0 || len(outputFixes) > 0 || len(outputFinishes) > 0 {
 			sayf(colorstring.Color("[green]DELIVERING\n"))
@@ -105,9 +110,29 @@ func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources, c
 	sayf("\n")
 }
 
-func checkGitLog(verbs []string, story tracker.Story, dir string) []byte {
+var resettingStoryStates map[string]bool = map[string]bool{
+	"delivered": true,
+	"rejected":  true,
+	"accepted":  true,
+}
+
+func getStoryResetTime(client tracker.ProjectClient, story tracker.Story) (time.Time, error) {
+	activityList, err := client.StoryActivity(story.ID, tracker.ActivityQuery{})
+	if err != nil {
+		return time.Time{}, err
+	}
+	for _, activity := range activityList {
+		if activity.Kind == "story_update_activity" && resettingStoryStates[activity.Highlight] {
+			return activity.OccurredAt, nil
+		}
+	}
+	return time.Time{}, nil
+}
+
+func checkGitLog(verbs []string, story tracker.Story, dir string, after time.Time) []byte {
+	afterArg := after.Format(time.RFC3339)
 	verbsRegexp := fmt.Sprintf("(%s)", strings.Join(verbs, "|"))
-	command := exec.Command("git", "log", "-i", "--extended-regexp", "--grep", fmt.Sprintf("%s\\s+(#[0-9]+,\\s+)*#%d", verbsRegexp, story.ID))
+	command := exec.Command("git", "log", "-i", "--extended-regexp", "--grep", fmt.Sprintf("%s\\s+(#[0-9]+,\\s+)*#%d", verbsRegexp, story.ID), "--after", afterArg)
 	command.Dir = dir
 
 	output, err := command.CombinedOutput()
@@ -117,7 +142,7 @@ func checkGitLog(verbs []string, story tracker.Story, dir string) []byte {
 		return nil
 	}
 
-	command = exec.Command("git", "log", "-i", "--extended-regexp", "--grep", fmt.Sprintf("#%d(,\\s+#[0-9]+)*\\s+%s", story.ID, verbsRegexp))
+	command = exec.Command("git", "log", "-i", "--extended-regexp", "--grep", fmt.Sprintf("#%d(,\\s+#[0-9]+)*\\s+%s", story.ID, verbsRegexp), "--after", afterArg)
 	command.Dir = dir
 
 	output2, err := command.CombinedOutput()

@@ -225,5 +225,65 @@
        "labels":
        [
        ]
+   },
+   {
+       "kind": "story",
+       "id": 444444,
+       "created_at": "2006-01-02T15:04:05Z",
+       "updated_at": "2006-01-02T15:04:05Z",
+       "estimate": 2,
+       "story_type": "feature",
+       "name": "Story that gets rejected",
+       "description": "it gets rejected in the future",
+       "current_state": "finished",
+       "requested_by_id": 101,
+       "project_id": 99,
+       "url": "http://localhost/story/show/555",
+       "owner_ids":
+       [
+       ],
+       "labels":
+       [
+       ]
+   },
+   {
+       "kind": "story",
+       "id": 555555,
+       "created_at": "2006-01-02T15:04:05Z",
+       "updated_at": "2006-01-02T15:04:05Z",
+       "estimate": 2,
+       "story_type": "feature",
+       "name": "Story that got rejected before",
+       "description": "but now there's a new commit that re-finishes it",
+       "current_state": "finished",
+       "requested_by_id": 101,
+       "project_id": 99,
+       "url": "http://localhost/story/show/555",
+       "owner_ids":
+       [
+       ],
+       "labels":
+       [
+       ]
+   },
+   {
+       "kind": "story",
+       "id": 666666,
+       "created_at": "2006-01-02T15:04:05Z",
+       "updated_at": "2006-01-02T15:04:05Z",
+       "estimate": 2,
+       "story_type": "feature",
+       "name": "Story that got rejected before and after",
+       "description": "the commit is in between two rejections",
+       "current_state": "finished",
+       "requested_by_id": 101,
+       "project_id": 99,
+       "url": "http://localhost/story/show/555",
+       "owner_ids":
+       [
+       ],
+       "labels":
+       [
+       ]
    }
 ]
