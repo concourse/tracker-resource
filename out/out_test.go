@@ -33,9 +33,9 @@ var _ = Describe("Out", func() {
 		var err error
 
 		tmpdir, err = ioutil.TempDir("", "out-tmp")
-		Ω(err).ShouldNot(HaveOccurred())
+		Expect(err).NotTo(HaveOccurred())
 		err = os.MkdirAll(tmpdir, 0755)
-		Ω(err).ShouldNot(HaveOccurred())
+		Expect(err).NotTo(HaveOccurred())
 
 		outCmd = exec.Command(outPath, tmpdir)
 	})
@@ -83,8 +83,8 @@ var _ = Describe("Out", func() {
 		It("finds finished stories that are mentioned in recent git commits", func() {
 			session := runCommand(outCmd, request)
 
-			Ω(session.Err).Should(Say(fmt.Sprintf("Checking for finished story: .*#%s", storyId)))
-			Ω(session.Err).Should(Say("middle/git3.*... .*DELIVERING"))
+			Expect(session.Err).To(Say(fmt.Sprintf("Checking for finished story: .*#%s", storyId)))
+			Expect(session.Err).To(Say("middle/git3.*... .*DELIVERING"))
 		})
 	})
 
@@ -143,55 +143,55 @@ var _ = Describe("Out", func() {
 			It("does not output credentials", func() {
 				session := runCommand(outCmd, request)
 
-				Ω(session.Err).ShouldNot(Say(trackerToken))
+				Expect(session.Err).NotTo(Say(trackerToken))
 			})
 
 			It("finds finished stories that are mentioned in recent git commits", func() {
 				session := runCommand(outCmd, request)
 
-				Ω(session.Err).Should(Say("Checking for finished story: .*#565"))
-				Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
-				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#565"))
+				Expect(session.Err).To(Say("git.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*SKIPPING"))
 
-				Ω(session.Err).Should(Say("Checking for finished story: .*#123456"))
-				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
-				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#123456"))
+				Expect(session.Err).To(Say("git.*... .*DELIVERING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*SKIPPING"))
 
-				Ω(session.Err).Should(Say("Checking for finished story: .*#123457"))
-				Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
-				Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#123457"))
+				Expect(session.Err).To(Say("git.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*DELIVERING"))
 
-				Ω(session.Err).Should(Say("Checking for finished story: .*#223456"))
-				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
-				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#223456"))
+				Expect(session.Err).To(Say("git.*... .*DELIVERING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*SKIPPING"))
 
-				Ω(session.Err).Should(Say("Checking for finished story: .*#323456"))
-				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
-				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#323456"))
+				Expect(session.Err).To(Say("git.*... .*DELIVERING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*SKIPPING"))
 
-				Ω(session.Err).Should(Say("Checking for finished story: .*#423456"))
-				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
-				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#423456"))
+				Expect(session.Err).To(Say("git.*... .*DELIVERING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*SKIPPING"))
 
-				Ω(session.Err).Should(Say("Checking for finished story: .*#523456"))
-				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
-				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#523456"))
+				Expect(session.Err).To(Say("git.*... .*DELIVERING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*SKIPPING"))
 
-				Ω(session.Err).Should(Say("Checking for finished story: .*#789456"))
-				Ω(session.Err).Should(Say("git.*... .*DELIVERING"))
-				Ω(session.Err).Should(Say("middle/git2.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#789456"))
+				Expect(session.Err).To(Say("git.*... .*DELIVERING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*SKIPPING"))
 
-				Ω(session.Err).Should(Say("Checking for finished story: .*#223457"))
-				Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
-				Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#223457"))
+				Expect(session.Err).To(Say("git.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*DELIVERING"))
 
-				Ω(session.Err).Should(Say("Checking for finished story: .*#323457"))
-				Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
-				Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#323457"))
+				Expect(session.Err).To(Say("git.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*DELIVERING"))
 
-				Ω(session.Err).Should(Say("Checking for finished story: .*#423457"))
-				Ω(session.Err).Should(Say("git.*... .*SKIPPING"))
-				Ω(session.Err).Should(Say("middle/git2.*... .*DELIVERING"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#423457"))
+				Expect(session.Err).To(Say("git.*... .*SKIPPING"))
+				Expect(session.Err).To(Say("middle/git2.*... .*DELIVERING"))
 			})
 
 			// It("outputs the current time", func() {
@@ -208,7 +208,7 @@ var _ = Describe("Out", func() {
 				commentPath := "tracker-resource-comment"
 				request.Params.CommentPath = commentPath
 				err := ioutil.WriteFile(filepath.Join(tmpdir, commentPath), []byte("some custom comment"), os.ModePerm)
-				Ω(err).ShouldNot(HaveOccurred())
+				Expect(err).NotTo(HaveOccurred())
 
 				server.AppendHandlers(
 					listStoriesHandler(trackerToken),
@@ -237,8 +237,8 @@ var _ = Describe("Out", func() {
 
 			It("should make a comment with the file's contents", func() {
 				session := runCommand(outCmd, request)
-				Ω(session.Err).Should(Say("Checking for finished story: .*#123456"))
-				Ω(session.Err).Should(Say("Checking for finished story: .*#123457"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#123456"))
+				Expect(session.Err).To(Say("Checking for finished story: .*#123457"))
 
 				os.Remove(request.Params.CommentPath)
 			})
@@ -249,7 +249,7 @@ var _ = Describe("Out", func() {
 				request.Params.CommentPath = "some-non-existent-file"
 
 				session := runCommandExpectingStatus(outCmd, request, 1)
-				Ω(session.Err).Should(Say("error reading comment file: open"))
+				Expect(session.Err).To(Say("error reading comment file: open"))
 			})
 		})
 	})
@@ -262,12 +262,12 @@ func runCommand(outCmd *exec.Cmd, request out.OutRequest) *Session {
 func runCommandExpectingStatus(outCmd *exec.Cmd, request out.OutRequest, status int) *Session {
 	timeout := 10 * time.Second
 	stdin, err := outCmd.StdinPipe()
-	Ω(err).ShouldNot(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 
 	session, err := Start(outCmd, GinkgoWriter, GinkgoWriter)
-	Ω(err).ShouldNot(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 	err = json.NewEncoder(stdin).Encode(request)
-	Ω(err).ShouldNot(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 	Eventually(session, timeout).Should(Exit(status))
 
 	return session
@@ -313,12 +313,12 @@ func setupTestEnvironmentWithActualStoryID(path string, storyId string) {
 	cmd.Stderr = GinkgoWriter
 
 	err := cmd.Run()
-	Ω(err).ShouldNot(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 }
 
 func createActualStory(projectID string, trackerToken string) string {
 	projectIDInt, err := strconv.Atoi(projectID)
-	Ω(err).NotTo(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 
 	client := tracker.NewClient(trackerToken).InProject(projectIDInt)
 	story := tracker.Story{
@@ -327,18 +327,18 @@ func createActualStory(projectID string, trackerToken string) string {
 		State: tracker.StoryStateFinished,
 	}
 	story, err = client.CreateStory(story)
-	Ω(err).NotTo(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 	return strconv.Itoa(story.ID)
 }
 
 func deleteActualStory(projectID string, trackerToken string, storyId string) {
 	projectIDInt, err := strconv.Atoi(projectID)
-	Ω(err).NotTo(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 
 	storyIDInt, err := strconv.Atoi(storyId)
-	Ω(err).NotTo(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 
 	client := tracker.NewClient(trackerToken).InProject(projectIDInt)
 	err = client.DeleteStory(storyIDInt)
-	Ω(err).NotTo(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 }

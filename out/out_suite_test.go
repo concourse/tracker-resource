@@ -18,7 +18,7 @@ var _ = BeforeSuite(func() {
 	var err error
 
 	outPath, err = gexec.Build("github.com/concourse/tracker-resource/out/cmd/out")
-	Ω(err).ShouldNot(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 })
 
 var _ = AfterSuite(func() {

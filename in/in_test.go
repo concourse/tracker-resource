@@ -26,13 +26,13 @@ var _ = Describe("In", func() {
 
 	JustBeforeEach(func() {
 		binPath, err := gexec.Build("github.com/concourse/tracker-resource/in/cmd/in")
-		Ω(err).ShouldNot(HaveOccurred())
+		Expect(err).NotTo(HaveOccurred())
 
 		tmpDir, err = ioutil.TempDir("", "tracker_resource_in")
 
 		stdin := &bytes.Buffer{}
 		err = json.NewEncoder(stdin).Encode(request)
-		Ω(err).ShouldNot(HaveOccurred())
+		Expect(err).NotTo(HaveOccurred())
 
 		cmd := exec.Command(binPath, tmpDir)
 		cmd.Stdin = stdin
@@ -43,17 +43,17 @@ var _ = Describe("In", func() {
 			GinkgoWriter,
 			GinkgoWriter,
 		)
-		Ω(err).ShouldNot(HaveOccurred())
+		Expect(err).NotTo(HaveOccurred())
 
 		Eventually(session).Should(gexec.Exit(0))
 
 		err = json.Unmarshal(session.Out.Contents(), &response)
-		Ω(err).ShouldNot(HaveOccurred())
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	AfterEach(func() {
 		err := os.RemoveAll(tmpDir)
-		Ω(err).ShouldNot(HaveOccurred())
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	Context("when a version is given to the executable", func() {
@@ -70,7 +70,7 @@ var _ = Describe("In", func() {
 		})
 
 		It("outputs that version", func() {
-			Ω(response.Version.Time).Should(BeTemporally("~", request.Version.Time, time.Second))
+			Expect(response.Version.Time).To(BeTemporally("~", request.Version.Time, time.Second))
 		})
 	})
 
@@ -85,7 +85,7 @@ var _ = Describe("In", func() {
 		})
 
 		It("generates a 'fake' current version", func() {
-			Ω(response.Version.Time).Should(BeTemporally("~", time.Now(), time.Second))
+			Expect(response.Version.Time).To(BeTemporally("~", time.Now(), time.Second))
 		})
 	})
 })
