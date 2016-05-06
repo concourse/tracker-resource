@@ -48,12 +48,16 @@ var _ = Describe("Out", func() {
 		var (
 			request            out.OutRequest
 			storyId            string
+			projectId          string
 			actualTrackerToken string
 		)
 
-		projectId := "1412996"
-
 		BeforeEach(func() {
+			projectId = os.Getenv("TRACKER_PROJECT")
+			if projectId == "" {
+				Skip("TRACKER_PROJECT must be provided.")
+			}
+
 			actualTrackerToken = os.Getenv("TRACKER_TOKEN")
 			if actualTrackerToken == "" {
 				Skip("TRACKER_TOKEN must be provided.")
