@@ -11,6 +11,7 @@ outputs:
 
 params:
   TRACKER_TOKEN:
+  TRACKER_PROJECT:
 
 run:
   path: gopath/src/github.com/concourse/tracker-resource/scripts/ci
