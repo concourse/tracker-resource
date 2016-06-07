@@ -23,7 +23,7 @@ When you use the [Pivotal Tracker syntax for finishing a story or fixing a bug](
 
 Replace `TRACKER_API_TOKEN` and `TRACKER_PROJECT_ID` with your API token (which can be found on your profile page) and your project ID (which can be found in the URL of your project). Make sure that your project ID is a string because it will converted to JSON when given to the resource and JSON doesn't like integers.
 
-You'll need a seperate resource for each Tracker project.
+You'll need a separate resource for each Tracker project.
 
 ### Build
 
