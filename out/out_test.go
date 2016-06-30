@@ -48,6 +48,7 @@ var _ = Describe("Out", func() {
 		var (
 			request            out.OutRequest
 			storyId            string
+			deliveredStoryId   string
 			projectId          string
 			actualTrackerToken string
 		)
@@ -63,8 +64,9 @@ var _ = Describe("Out", func() {
 				Skip("TRACKER_TOKEN must be provided.")
 			}
 
-			storyId = createActualStory(projectId, actualTrackerToken)
-			setupTestEnvironmentWithActualStoryID(tmpdir, storyId)
+			storyId = createActualStory(projectId, actualTrackerToken, tracker.StoryStateFinished)
+			deliveredStoryId = createActualStory(projectId, actualTrackerToken, tracker.StoryStateDelivered)
+			setupTestEnvironmentWithActualStoryID(tmpdir, storyId, deliveredStoryId)
 
 			request = out.OutRequest{
 				Source: resource.Source{
@@ -89,6 +91,17 @@ var _ = Describe("Out", func() {
 
 			Expect(session.Err).To(Say(fmt.Sprintf("Checking for finished story: .*#%s", storyId)))
 			Expect(session.Err).To(Say("middle/git3.*... .*DELIVERING"))
+		})
+
+		Context("when 'delivered' stories option is passed", func() {
+			It("finds delivered stories in addition to finished stories that are mentioned in recent git commits", func() {
+				request.Params.Delivered = true
+				session := runCommand(outCmd, request)
+
+				Expect(session.Err).To(Say(fmt.Sprintf("Checking for finished story: .*#%s", storyId)))
+				Expect(session.Err).To(Say(fmt.Sprintf("Checking for delivered story: .*#%s", deliveredStoryId)))
+				Expect(session.Err).To(Say("middle/git3.*... .*DELIVERING"))
+			})
 		})
 	})
 
@@ -436,11 +449,11 @@ func deliverStoryHandler(token string, projectId string, storyId int) http.Handl
 }
 
 func setupTestEnvironment(path string) {
-	setupTestEnvironmentWithActualStoryID(path, "")
+	setupTestEnvironmentWithActualStoryID(path, "", "")
 }
 
-func setupTestEnvironmentWithActualStoryID(path string, storyId string) {
-	cmd := exec.Command(filepath.Join("scripts/setup.sh"), path, storyId)
+func setupTestEnvironmentWithActualStoryID(path string, storyId string, deliveredStoryId string) {
+	cmd := exec.Command(filepath.Join("scripts/setup.sh"), path, storyId, deliveredStoryId)
 	cmd.Stdout = GinkgoWriter
 	cmd.Stderr = GinkgoWriter
 
@@ -448,7 +461,7 @@ func setupTestEnvironmentWithActualStoryID(path string, storyId string) {
 	Expect(err).NotTo(HaveOccurred())
 }
 
-func createActualStory(projectID string, trackerToken string) string {
+func createActualStory(projectID string, trackerToken string, trackerState tracker.StoryState) string {
 	projectIDInt, err := strconv.Atoi(projectID)
 	Expect(err).NotTo(HaveOccurred())
 
@@ -456,7 +469,7 @@ func createActualStory(projectID string, trackerToken string) string {
 	story := tracker.Story{
 		Name:  "concourse test story",
 		Type:  tracker.StoryTypeBug,
-		State: tracker.StoryStateFinished,
+		State: trackerState,
 	}
 	story, err = client.CreateStory(story)
 	Expect(err).NotTo(HaveOccurred())

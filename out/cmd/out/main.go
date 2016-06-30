@@ -62,24 +62,47 @@ func main() {
 
 	tracker.DefaultURL = trackerURL
 	client := tracker.NewClient(token).InProject(projectID)
+	commentString := string(comment)
 
 	query := tracker.StoriesQuery{
 		State: tracker.StoryStateFinished,
 	}
+
 	stories, _, err := client.Stories(query)
 	if err != nil {
 		fatal("getting list of stories", err)
 	}
 
+	if request.Params.Delivered {
+		query := tracker.StoriesQuery{
+			State: tracker.StoryStateDelivered,
+		}
+
+		deliveredStories, _, err := client.Stories(query)
+		if err != nil {
+			fatal("getting list of delivered stories", err)
+		}
+
+		stories = append(stories, deliveredStories...)
+	}
+
 	for _, story := range stories {
-		deliverIfDone(client, story, sources, string(comment), repos)
+		deliverIfDone(client, story, sources, commentString, repos)
 	}
 
 	outputResponse()
 }
 
+func commentOnStory(client tracker.ProjectClient, story tracker.Story, sources, comment string, repos []string) {
+	if comment == "" {
+		return
+	}
+
+	client.DeliverStoryWithComment(story.ID, comment)
+}
+
 func deliverIfDone(client tracker.ProjectClient, story tracker.Story, sources, comment string, repos []string) {
-	sayf(colorstring.Color("Checking for finished story: [blue]#%d\n"), story.ID)
+	sayf(colorstring.Color("Checking for %s story: [blue]#%d\n"), story.State, story.ID)
 
 	storyResetTime, err := getStoryResetTime(client, story)
 	if err != nil {
