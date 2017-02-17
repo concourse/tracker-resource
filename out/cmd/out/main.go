@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/XenoPhex/go-tracker"
 	"github.com/concourse/tracker-resource"
 	"github.com/concourse/tracker-resource/out"
 	"github.com/mitchellh/colorstring"
+	"github.com/xoebus/go-tracker"
 )
 
 func buildRequest() out.OutRequest {
