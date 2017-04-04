@@ -10,6 +10,7 @@ type OutRequest struct {
 type Params struct {
 	Repos       []string `json:"repos"`
 	CommentPath string   `json:"comment"`
+	Delivered   bool     `json:"delivered"`
 }
 
 type OutResponse struct {

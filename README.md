@@ -43,3 +43,5 @@ You'll need a separate resource for each Tracker project.
 * `repos`: *Required.* Paths to the git repositories which will contain the delivering commits.
 
 * `comment`: *Optional.* A file containing a comment to leave on any delivered stories.
+
+* `delivered`: *Optional.* An option specifying whether to leave a comment on pre-delivered stories. Defaults to 'false'.

@@ -4,6 +4,7 @@ set -e
 
 DIR=$1
 ACTUAL_STORY_ID=$2
+ACTUAL_DELIVERED_STORY_ID=$3
 
 # random file
 pushd $DIR
@@ -62,20 +63,38 @@ pushd $DIR/middle/git2
 	git commit -m "fix previously rejected story badly so it gets rejected again [Complete #666666]" --allow-empty
 popd
 
-if [ ! -z ${ACTUAL_STORY_ID} ]; then
-	echo "ACTUAL_STORY_ID: ${ACTUAL_STORY_ID}"
-	# git3: git with a vengence directory
+if [ ! -z ${ACTUAL_STORY_ID} ] || [ ! -z ${ACTUAL_DELIVERED_STORY_ID} ] ; then
 	mkdir -p $DIR/middle/git3
 	pushd $DIR/middle/git3
 		git init
 
 		git config user.email "concourse@example.com"
 		git config user.name "Concourse Tracker Resource"
+	popd
+fi
 
+if [ ! -z ${ACTUAL_STORY_ID} ]; then
+	echo "ACTUAL_STORY_ID: ${ACTUAL_STORY_ID}"
+	# git3: git with a vengence directory
+	mkdir -p $DIR/middle/git3
+	pushd $DIR/middle/git3
 		echo "bugfix" > file.txt
 		git add file.txt
 		git commit -m "fix bug
 
 		[fixes #${ACTUAL_STORY_ID}]"
+	popd
+fi
+
+if [ ! -z ${ACTUAL_DELIVERED_STORY_ID} ]; then
+	echo "ACTUAL_DELIVERED_STORY_ID: ${ACTUAL_DELIVERED_STORY_ID}"
+	# git3: git with a vengence directory
+	mkdir -p $DIR/middle/git3
+	pushd $DIR/middle/git3
+		echo "feature" > file.txt
+		git add file.txt
+		git commit -m "add feature
+
+		[finishes #${ACTUAL_DELIVERED_STORY_ID}]"
 	popd
 fi
