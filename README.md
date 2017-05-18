@@ -32,7 +32,7 @@ You'll need a separate resource for each Tracker project.
   plan:
   - get: git-repo-path
   - ...
-  - put: tracker
+  - put: tracker-output
     params:
       repos:
       - git-repo-path
