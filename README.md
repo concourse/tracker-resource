@@ -6,7 +6,7 @@ An output only resource that will deliver finished [Pivotal Tracker][tracker] st
 
 ## Usage
 
-When you use the [Pivotal Tracker syntax for finishing a story or fixing a bug](https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks) this resource will detect it in your commit history and deliver the appropriate stories.
+When you use the [Pivotal Tracker syntax for finishing a story or fixing a bug](https://www.pivotaltracker.com/help/articles/githubs_service_hook_for_tracker/#formatting-your-commits) this resource will detect it in your commit history and deliver the appropriate stories.
 
 ## Configuration
 
