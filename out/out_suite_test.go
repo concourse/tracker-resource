@@ -2,6 +2,7 @@ package out_test
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -17,8 +18,12 @@ var (
 var _ = BeforeSuite(func() {
 	var err error
 
-	outPath, err = gexec.Build("github.com/concourse/tracker-resource/out/cmd/out")
-	Expect(err).NotTo(HaveOccurred())
+	if _, err = os.Stat("/opt/resource/out"); err == nil {
+		outPath = "/opt/resource/out"
+	} else {
+		outPath, err = gexec.Build("github.com/concourse/tracker-resource/out/cmd/out")
+		Expect(err).NotTo(HaveOccurred())
+	}
 })
 
 var _ = AfterSuite(func() {
