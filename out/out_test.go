@@ -94,7 +94,6 @@ var _ = Describe("Out", func() {
 
 	Context("when executed against a mock URL", func() {
 		var request out.OutRequest
-		var response out.OutResponse
 
 		var server *ghttp.Server
 
@@ -119,8 +118,6 @@ var _ = Describe("Out", func() {
 					},
 				},
 			}
-			response = out.OutResponse{}
-
 		})
 
 		AfterEach(func() {
@@ -237,14 +234,6 @@ var _ = Describe("Out", func() {
 				Expect(session.Err).To(Say("git.*... .*SKIPPING"))
 				Expect(session.Err).To(Say("middle/git2.*... .*SKIPPING"))
 			})
-
-			// It("outputs the current time", func() {
-			// 	session := runCommand(outCmd, request)
-
-			// 	err := json.Unmarshal(session.Out.Contents(), &response)
-			// 	Ω(err).ShouldNot(HaveOccurred())
-			// 	Ω(response.Version.Time).Should(BeTemporally("~", time.Now(), time.Second))
-			// })
 		})
 
 		Context("when a comment file is specified", func() {
