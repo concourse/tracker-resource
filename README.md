@@ -56,6 +56,6 @@ will stop the build.
 Run the tests with the following commands for both `alpine` and `ubuntu` images:
 
 ```sh
-docker build -t time-resource -f dockerfiles/alpine/Dockerfile .
-docker build -t time-resource -f dockerfiles/ubuntu/Dockerfile .
+docker build -t tracker-resource -f dockerfiles/alpine/Dockerfile .
+docker build -t tracker-resource -f dockerfiles/ubuntu/Dockerfile .
 ```
