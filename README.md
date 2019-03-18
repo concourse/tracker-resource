@@ -43,3 +43,19 @@ You'll need a separate resource for each Tracker project.
 * `repos`: *Required.* Paths to the git repositories which will contain the delivering commits.
 
 * `comment`: *Optional.* A file containing a comment to leave on any delivered stories.
+
+## Development
+
+### Running the tests
+
+The tests have been embedded with the `Dockerfile`; ensuring that the testing
+environment is consistent across any `docker` enabled platform. When the docker
+image builds, the test are run inside the docker container, on failure they
+will stop the build.
+
+Run the tests with the following commands for both `alpine` and `ubuntu` images:
+
+```sh
+docker build -t time-resource -f dockerfiles/alpine/Dockerfile .
+docker build -t time-resource -f dockerfiles/ubuntu/Dockerfile .
+```
