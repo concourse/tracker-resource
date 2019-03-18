@@ -46,6 +46,14 @@ You'll need a separate resource for each Tracker project.
 
 ## Development
 
+### Prerequisites
+
+* golang is *required* - version 1.9.x is tested; earlier versions may also
+  work.
+* docker is *required* - version 17.06.x is tested; earlier versions may also
+  work.
+* godep is used for dependency management of the golang packages.
+
 ### Running the tests
 
 The tests have been embedded with the `Dockerfile`; ensuring that the testing
@@ -59,3 +67,8 @@ Run the tests with the following commands for both `alpine` and `ubuntu` images:
 docker build -t tracker-resource -f dockerfiles/alpine/Dockerfile .
 docker build -t tracker-resource -f dockerfiles/ubuntu/Dockerfile .
 ```
+
+### Contributing
+
+Please make all pull requests to the `master` branch and ensure tests pass
+locally.
