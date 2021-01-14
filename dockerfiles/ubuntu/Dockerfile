@@ -1,4 +1,7 @@
-FROM concourse/golang-builder as builder
+ARG base_image
+ARG builder_image=concourse/golang-builder
+
+FROM ${builder_image} as builder
 COPY . /go/src/github.com/concourse/tracker-resource
 ENV CGO_ENABLED 0
 ENV GOPATH /go/src/github.com/concourse/tracker-resource/Godeps/_workspace:${GOPATH}
@@ -11,7 +14,7 @@ RUN set -e; mkdir /tests; for pkg in $(go list ./...); do \
 		go test -o "/tests/$(basename $pkg)/run" -c $pkg; \
 	done
 
-FROM ubuntu:bionic AS resource
+FROM ${base_image} AS resource
 RUN apt-get update \
       && DEBIAN_FRONTEND=noninteractive \
       apt-get install -y --no-install-recommends \
