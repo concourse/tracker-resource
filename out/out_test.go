@@ -378,7 +378,7 @@ func storyActivityHandler(token string, projectId string, storyId int) http.Hand
 		{
 			"kind": "story_update_activity",
 			"highlight": "rejected",
-			"occurred_at": "1016-03-15T00:11:16Z"
+			"occurred_at": "2016-03-15T00:11:16Z"
 		}]`
 	case 666666:
 		body = `[
@@ -390,7 +390,7 @@ func storyActivityHandler(token string, projectId string, storyId int) http.Hand
 		{
 			"kind": "story_update_activity",
 			"highlight": "rejected",
-			"occurred_at": "1016-03-15T00:11:16Z"
+			"occurred_at": "2016-03-15T00:11:16Z"
 		}]`
 	}
 	return ghttp.CombineHandlers(
