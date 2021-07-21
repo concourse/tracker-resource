@@ -14,7 +14,8 @@ RUN set -e; mkdir /tests; for pkg in $(go list ./...); do \
 	done
 
 FROM ${base_image} AS resource
-RUN apk add --update bash tzdata ca-certificates git
+RUN apk update && apk upgrade && \
+	apk add --update bash tzdata ca-certificates git
 COPY --from=builder /assets /opt/resource
 
 FROM resource AS tests

@@ -14,9 +14,9 @@ RUN set -e; mkdir /tests; for pkg in $(go list ./...); do \
 	done
 
 FROM ${base_image} AS resource
-RUN apt-get update \
+RUN apt update && apt upgrade -y \
       && DEBIAN_FRONTEND=noninteractive \
-      apt-get install -y --no-install-recommends \
+      apt install -y --no-install-recommends \
         tzdata \
         ca-certificates \
         git \
