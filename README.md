@@ -1,3 +1,9 @@
+# Pivotal Tracker EOL
+
+https://www.pivotaltracker.com/blog/2024-09-18-end-of-life
+
+Therefore we are archiving this repo. Tracker will not be included in future releases of Concourse.
+
 # Tracker Resource
 
 An output only resource that will deliver finished [Pivotal Tracker][tracker] stories that are linked in recent git commits.
