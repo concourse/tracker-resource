@@ -9,7 +9,7 @@ require (
 	github.com/onsi/gomega v0.0.0-20170214000320-c463cd2a8578
 	github.com/xoebus/go-tracker v0.0.0-00010101000000-000000000000
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a // indirect
-	golang.org/x/sys v0.0.0-20160717071931-a646d33e2ee3 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.0.0-20170208141851-a3f3340b5840 // indirect
 )
